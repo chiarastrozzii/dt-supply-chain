@@ -1,0 +1,16 @@
+{
+  "p_ArrivalRate": 5,
+  "p_BufferOrders": 50,
+  "p_MaxWaitLimit": 10.0,
+  "p_capacityLC1": 30,
+  "p_capacityLC2": 30,
+  "p_capacityLC3": 30,
+  "p_emissionFactor" : 0.8,
+  "logisticsData" : [
+    {"location": "sourceS1", "lorries": 30, "unitsPerLorry": 10},
+    {"location": "sourceS2", "lorries": 20, "unitsPerLorry": 10},
+    {"location": "sourceS3", "lorries": 30, "unitsPerLorry": 10},
+    {"location": "sourceS4", "lorries": 10, "unitsPerLorry": 10},
+    {"location" : "productionFloor", "lorries": 50, "unitsPerLorry": 1}
+  ]
+}
