@@ -20,7 +20,7 @@
 			<Name><![CDATA[Main]]></Name>
 			<Import><![CDATA[import java.util.Scanner;]]></Import>
 			<StartupCode><![CDATA[try {
-   	results.println("OrderID,TargetCenter,WaitOrder,WaitLogicCenter,Distance,ProcessingTime,FinishTime,CO2PerOrder,CarbonRatio");
+   	results.println("OrderID,TargetCenter,LogicCenterName,WaitOrder,WaitLogicCenter,Distance,ProcessingTime,FinishTime,CO2PerOrder,CarbonRatio");
    	traceln("results file ready");
     String path = "config.json"; 
     String content = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(path)));
@@ -715,7 +715,7 @@
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL1]]></ItemName>
+						<ItemName><![CDATA[LCBolzano]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -749,7 +749,7 @@
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL2]]></ItemName>
+						<ItemName><![CDATA[LCVerona]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -782,7 +782,7 @@
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL3]]></ItemName>
+						<ItemName><![CDATA[LCMilano]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -970,7 +970,7 @@
 					<SourceEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL1]]></ItemName>
+						<ItemName><![CDATA[LCBolzano]]></ItemName>
 					</SourceEmbeddedObjectReference>
 					<SourceConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -1046,7 +1046,7 @@
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL2]]></ItemName>
+						<ItemName><![CDATA[LCVerona]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -1112,7 +1112,7 @@
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL3]]></ItemName>
+						<ItemName><![CDATA[LCMilano]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -1211,7 +1211,7 @@
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL1]]></ItemName>
+						<ItemName><![CDATA[LCBolzano]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -1259,7 +1259,7 @@
 				<Connector>
 					<Id>1777308536836</Id>
 					<Name><![CDATA[connector16]]></Name>
-					<X>1260</X><Y>810</Y>
+					<X>1250</X><Y>810</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -1277,7 +1277,7 @@
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL2]]></ItemName>
+						<ItemName><![CDATA[LCVerona]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -1286,7 +1286,7 @@
 					</TargetConnectableItemReference>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>40</X><Y>0</Y></Point>
+						<Point><X>50</X><Y>0</Y></Point>
 					</Points>
 				</Connector>
 				<Connector>
@@ -1343,7 +1343,7 @@
 					<TargetEmbeddedObjectReference>
 						<PackageName><![CDATA[test_chain]]></PackageName>
 						<ClassName><![CDATA[Main]]></ClassName>
-						<ItemName><![CDATA[assemblerL3]]></ItemName>
+						<ItemName><![CDATA[LCMilano]]></ItemName>
 					</TargetEmbeddedObjectReference>
 					<TargetConnectableItemReference>
 						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
@@ -2313,7 +2313,7 @@
 					</TargetConnectableItemReference>
 					<Points>
 						<Point><X>0</X><Y>0</Y></Point>
-						<Point><X>60</X><Y>0</Y></Point>
+						<Point><X>50</X><Y>0</Y></Point>
 					</Points>
 				</Connector>
 				<Connector>
@@ -4432,7 +4432,7 @@ tempAssemblerCO2 = 0;
 				</EmbeddedObject>
 				<EmbeddedObject>
 					<Id>1774884147762</Id>
-					<Name><![CDATA[assemblerL1]]></Name>
+					<Name><![CDATA[LCBolzano]]></Name>
 					<X>1300</X><Y>670</Y>
 					<Label><X>-10</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
@@ -4993,7 +4993,7 @@ agent.p_logicCenterName = self.getName();
 						<Parameter>
 							<Name><![CDATA[onExit]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[assemblerL1.set_quantity2(agent.p_C4);]]></Code>
+								<Code><![CDATA[LCBolzano.set_quantity2(agent.p_C4);]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -5034,7 +5034,7 @@ agent.p_logicCenterName = self.getName();
 				<EmbeddedObject>
 					<Id>1774884991641</Id>
 					<Name><![CDATA[bufferCenter2]]></Name>
-					<X>1220</X><Y>790</Y>
+					<X>1210</X><Y>790</Y>
 					<Label><X>-5</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -5102,7 +5102,7 @@ agent.p_logicCenterName = self.getName();
 						<Parameter>
 							<Name><![CDATA[onExit]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[assemblerL2.set_quantity2(agent.p_C4);]]></Code>
+								<Code><![CDATA[LCVerona.set_quantity2(agent.p_C4);]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -5211,7 +5211,7 @@ agent.p_logicCenterName = self.getName();
 						<Parameter>
 							<Name><![CDATA[onExit]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[assemblerL3.set_quantity2(agent.p_C4);]]></Code>
+								<Code><![CDATA[LCMilano.set_quantity2(agent.p_C4);]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -5251,7 +5251,7 @@ agent.p_logicCenterName = self.getName();
 				</EmbeddedObject>
 				<EmbeddedObject>
 					<Id>1774885892998</Id>
-					<Name><![CDATA[assemblerL2]]></Name>
+					<Name><![CDATA[LCVerona]]></Name>
 					<X>1300</X><Y>790</Y>
 					<Label><X>-10</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
@@ -5631,7 +5631,7 @@ agent.p_logicCenterName = self.getName();
 				</EmbeddedObject>
 				<EmbeddedObject>
 					<Id>1774885912828</Id>
-					<Name><![CDATA[assemblerL3]]></Name>
+					<Name><![CDATA[LCMilano]]></Name>
 					<X>1300</X><Y>930</Y>
 					<Label><X>-10</X><Y>-10</Y></Label>
 					<PublicFlag>false</PublicFlag>
@@ -14620,7 +14620,7 @@ else if(p_targetCenter == 3) truckGreen.setVisible(true);]]></StartupCode>
 					<Z>0</Z>
 					<Rotation>0.0</Rotation>
 					<Color>-12490271</Color>
-					<Text><![CDATA[test chain]]></Text>
+					<Text><![CDATA[actual system]]></Text>
 					<Font>
 						<Name>SansSerif</Name>
 						<Size>24</Size>
@@ -14725,12 +14725,6 @@ public class MyConfig implements Serializable {
 		<Resource>
 			<Id>1777306498094</Id>
 			<Path><![CDATA[3d/truck.dae]]></Path>
-			<ReferencedFromUserCode>false</ReferencedFromUserCode>
-			<Location>FILE_SYSTEM</Location>
-		</Resource>
-		<Resource>
-			<Id>1778687940586</Id>
-			<Path><![CDATA[Libraries/Pypeline.jar]]></Path>
 			<ReferencedFromUserCode>false</ReferencedFromUserCode>
 			<Location>FILE_SYSTEM</Location>
 		</Resource>
