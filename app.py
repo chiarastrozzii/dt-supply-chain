@@ -180,24 +180,31 @@ if current_data:
 
     if 'WaitOrder' in df.columns:
         st.subheader("Real Time Order Processing Delay")
-        fig = px.line(df, x=df.index, y="WaitOrder", 
-                      #title="Real-Time Order Wait Times for Processing",
-                      template="plotly_dark",
-                      line_shape="spline",
-                      hover_data={"OrderID": True, "WaitOrder": ':.2f'})
-        
-        fig.update_traces(line_color='#00d4ff', line_width=3)
+        #fig = px.line(df, x=df.index, y="WaitOrder", 
+        #              #title="Real-Time Order Wait Times for Processing",
+        #              template="plotly_dark",
+        #              line_shape="spline",
+        #              hover_data={"OrderID": True, "WaitOrder": ':.2f'})
+        #
+        #fig.update_traces(line_color='#00d4ff', line_width=3)
+        fig = px.histogram(df, 
+                           x="WaitOrder", 
+                           nbins=40,
+                           template="plotly_dark",
+                           color_discrete_sequence=['#318CE7'],
+                           labels={"WaitOrder": "Wait Time (Hours)", "count": "Number of Orders"})
+        fig.update_layout(bargap=0.1)
         st.plotly_chart(fig, width='stretch')
 
     if 'WaitLogicCenter' in df.columns:
         st.subheader("Real Time Wait Times from Production Floor to Logic Centers")
-        fig2 = px.line(df, x=df.index, y="WaitLogicCenter", 
-                      #title="Real Time Logic Center Wait Times",
-                      template="plotly_dark",
-                      line_shape="spline",
-                      hover_data={"OrderID": True, "WaitLogicCenter": ':.2f'})
-
-        fig2.update_traces(line_color='#ff6e00', line_width=3)
+        fig2 = px.histogram(df, 
+                            x="WaitLogicCenter", 
+                            nbins=40, 
+                            template="plotly_dark",
+                            color_discrete_sequence=['#fe6f5e'],
+                            labels={"WaitLogicCenter": "Wait Time (Hours)", "count": "Number of Orders"})
+        fig2.update_layout(bargap=0.1)
         st.plotly_chart(fig2, width='stretch')
 
     if 'CO2' in df.columns:
@@ -205,8 +212,9 @@ if current_data:
         fig_co2 = px.line(df, x=df.index, y="CO2", 
                           #title="CO2 Emissions per Order",
                           template="plotly_dark",
-                          hover_data={"OrderID": True, "CO2": ':.2f'})
-        fig_co2.update_traces(line_color='#00ff7f', line_width=3)
+                          hover_data={"OrderID": True, "CO2": ':.2f'},
+                          labels={"index": "Order Index", "CO2": "CO2 Emissions (kg)"})
+        fig_co2.update_traces(line_color='#90ee90', line_width=3)
         st.plotly_chart(fig_co2, width='stretch')
 
     if 'Timestamp' in df.columns:
@@ -224,7 +232,8 @@ if current_data:
 
         fig_hourly = px.bar(arrival_counts, x='AbsHour', y='OrderCount',
                             #title="Orders Arriving per Simulation Hour",
-                            template="plotly_dark")
+                            template="plotly_dark",
+                            labels={"AbsHour": "Simulation Hour (hours)", "OrderCount": "Number of Orders"})
         fig_hourly.update_traces(marker_color='#ff69b4')
         st.plotly_chart(fig_hourly, width='stretch')
     
