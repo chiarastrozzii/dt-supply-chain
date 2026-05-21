@@ -5,6 +5,7 @@ from flask import Flask, request
 import threading
 import socket
 from streamlit_autorefresh import st_autorefresh
+import plotly.graph_objects as go
 
 @st.cache_resource
 def get_global_list():
@@ -81,7 +82,7 @@ if 'server_started' not in st.session_state:
 # user interface
 st.set_page_config(page_title="Supply Chain Live Data", layout="wide", page_icon="💽")
 
-st_autorefresh(interval=2000, key="datarefresh")
+st_autorefresh(interval=5000, key="datarefresh")
 
 col_title, col_emoji = st.columns([0.9, 0.1])
 with col_title:
@@ -163,7 +164,7 @@ current_data = globals()['shared_data_list']  # Access the global list directly
 if current_data:
     df = pd.DataFrame(current_data)
 
-    c1, c2, c3, c4, c5 = st.columns(5)
+    c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
 
     tot_orders = df['OrderID'].nunique() if 'OrderID' in df.columns else 0
     avg_wait = df['WaitOrder'].mean() if 'WaitOrder' in df.columns else 0
@@ -172,11 +173,17 @@ if current_data:
     #timestamp = df['Timestamp'].nunique() if 'Timestamp' in df.columns else 0
     carbon_ratio = df['CarbonRatio'].mean() if 'CarbonRatio' in df.columns else 0
 
+    market_index = df['MarketIndex'].iloc[-1] if 'MarketIndex' in df.columns else 0
+    active_pf_lorries = df['ActivePFLorries'].iloc[-1] if 'ActivePFLorries' in df.columns else 0
+
     c1.metric("Total Orders", f"{tot_orders}")
     c2.metric("Average Order Wait Time", f"{avg_wait:.2f}h")
-    c3.metric("Max Bottleneck from Production Floor\n to Logic center", f"{max_bottleneck:.2f}h")
+    c3.metric("Max Bottleneck from Production Floor to Logic Center", f"{max_bottleneck:.2f}h")
     c4.metric("Total CO2", f"{total_co2:.2f}kg")
     c5.metric("Average Carbon Ratio", f"{carbon_ratio:.2f}")
+    c6.metric("Market Index", f"{market_index:.2f}")
+    c7.metric("Active Floor Lorries", f"{int(active_pf_lorries)}")
+
 
     if 'WaitOrder' in df.columns:
         st.subheader("Real Time Order Processing Delay")
@@ -219,22 +226,43 @@ if current_data:
 
     if 'Timestamp' in df.columns:
         st.subheader("Order Arrivals Over Time")
-        df['CreationHour'] = df['Timestamp'].astype(int)  # Convert seconds to hours
-        arrival_counts = df.groupby('CreationHour').size().reset_index(name='OrderCount')
+        if 'SimulationDate' in df.columns:
+            def clean_anylogic_date(date_str):
+                try:
+                    parts = str(date_str).split()
+                    if len(parts) >= 6:
+                        # Reconstruct without the timezone item: Month Day Year Time
+                        return f"{parts[1]} {parts[2]} {parts[5]} {parts[3]}"
+                except:
+                    pass
+                return None
 
-        #df['CreationHour'] = (df['Timestamp'] % 24).astype(int) 
-        # Count orders per hour
-        #arrival_counts = df.groupby('CreationHour').size().reindex(range(24), fill_value=0).reset_index(name='OrderCount')
+            df['CleanedDateText'] = df['SimulationDate'].apply(clean_anylogic_date)
+            df['DateTime'] = pd.to_datetime(df['CleanedDateText'], format="%b %d %Y %H:%M:%S", errors='coerce')
+        
+        # Fallback if parsing fails
+        if 'DateTime' not in df.columns or df['DateTime'].isna().all():
+            df['DateTime'] = pd.to_datetime("2026-03-23") + pd.to_timedelta(df['Timestamp'].astype(int), unit='h')
 
-        df['AbsHour'] = df['Timestamp'].astype(int) 
-        max_h = int(df['AbsHour'].max()) if not df.empty else 24
-        arrival_counts = df.groupby('AbsHour').size().reindex(range(max_h + 1), fill_value=0).reset_index(name='OrderCount')
+        total_days_simulated = (df['DateTime'].max() - df['DateTime'].min()).days
 
-        fig_hourly = px.bar(arrival_counts, x='AbsHour', y='OrderCount',
-                            #title="Orders Arriving per Simulation Hour",
+        # Group data into periods
+        if total_days_simulated > 30:
+            df['TimePeriod'] = df['DateTime'].dt.to_period('M')
+            xaxis_title = "Timeline (Aggregated Monthly Arrivals)"
+        else:
+            df['TimePeriod'] = df['DateTime'].dt.to_period('D')
+            xaxis_title = "Timeline (Aggregated Daily Arrivals)"
+
+        # Sort and group chronological history cleanly
+        arrival_counts = df.groupby('TimePeriod').size().reset_index(name='OrderCount')
+        arrival_counts['TimePeriod'] = arrival_counts['TimePeriod'].astype(str)
+
+        fig_hourly = px.bar(arrival_counts, x='TimePeriod', y='OrderCount',
                             template="plotly_dark",
-                            labels={"AbsHour": "Simulation Hour (hours)", "OrderCount": "Number of Orders"})
+                            labels={"TimePeriod": "Timeline", "OrderCount": "Number of Orders"})
         fig_hourly.update_traces(marker_color='#ff69b4')
+        fig_hourly.update_layout(xaxis_title=xaxis_title)
         st.plotly_chart(fig_hourly, width='stretch')
     
     if 'CenterName' in df.columns:
@@ -252,8 +280,74 @@ if current_data:
             color_continuous_scale='Purp',
             template="plotly_dark"
         )
-        
         st.plotly_chart(fig_workload, width='stretch')
+
+    if 'ProductPrice' in df.columns and 'CompetitorPrice' in df.columns and 'SimulationDate' in df.columns:
+        st.subheader("Competitor Price vs Our Product Price Weekly Trends")
+        df_trends = df.copy()
+
+        try:
+            # Cleanly extract date parts bypassing changing timezones (CET/CEST)
+            def clean_anylogic_date(date_str):
+                try:
+                    parts = str(date_str).split()
+                    if len(parts) >= 6:
+                        return f"{parts[1]} {parts[2]} {parts[5]} {parts[3]}"
+                except:
+                    pass
+                return None
+
+            df_trends['CleanedDateText'] = df_trends['SimulationDate'].apply(clean_anylogic_date)
+            df_trends['DateTime'] = pd.to_datetime(df_trends['CleanedDateText'], format="%b %d %Y %H:%M:%S", errors='coerce')
+            df_trends = df_trends.dropna(subset=['DateTime'])
+
+            if not df_trends.empty:
+                total_days_simulated = (df_trends['DateTime'].max() - df_trends['DateTime'].min()).days
+
+                if total_days_simulated > 180:
+                    freq_setting = 'ME'
+                    xaxis_label = "Timeline (Aggregated Monthly Means)"
+                    tick_format = '%Y-%m'
+                elif total_days_simulated > 30:
+                    freq_setting = 'W'
+                    xaxis_label = "Timeline (Aggregated Weekly Means)"
+                    tick_format = '%Y-%m-%d'
+                else:
+                    freq_setting = 'D'
+                    xaxis_label = "Timeline (Aggregated Daily Means)"
+                    tick_format = '%Y-%m-%d'
+
+                weekly_prices = df_trends.groupby(pd.Grouper(key='DateTime', freq=freq_setting))[['CompetitorPrice', 'ProductPrice']].mean().reset_index()
+
+                fig_price = go.Figure()
+
+                # Competitor line
+                fig_price.add_trace(go.Scatter(
+                    x=weekly_prices['DateTime'], y=weekly_prices['CompetitorPrice'],
+                    name='Competitor Avg Price',
+                    line=dict(color='#ED1B24', width=3, shape='hv')
+                ))
+
+                # Our Price line
+                fig_price.add_trace(go.Scatter(
+                    x=weekly_prices['DateTime'], y=weekly_prices['ProductPrice'],
+                    name='Our Avg Price',
+                    line=dict(color='#318CE7', width=3, shape='spline')
+                ))
+
+                fig_price.update_layout(
+                    template='plotly_dark',
+                    xaxis_title=xaxis_label,
+                    yaxis_title='Price (€)',
+                    hovermode='x unified',
+                    xaxis=dict(tickformat=tick_format)
+                )
+                st.plotly_chart(fig_price, width='stretch')
+            else:
+                st.info("Parsing dates... Waiting for valid timestamp records from simulation stream.")
+
+        except Exception as e:
+            st.error(f"Error processing trend line calculations: {e}")
 
     with st.expander("See Raw Data Stream"):
         st.dataframe(df.tail(10), width='stretch')

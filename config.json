@@ -1,5 +1,5 @@
 {
-  "p_ArrivalRate": 5,
+  "p_ArrivalRate": 1.6666, 
   "p_BufferOrders": 50,
   "p_MaxWaitLimit": 10.0,
   "p_capacityLC1": 30,
