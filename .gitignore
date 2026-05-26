@@ -16,5 +16,6 @@ out/
 Thumbs.db
 
 results.csv
+forecast_graphs/
 
 pypeline.properties

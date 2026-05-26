@@ -2599,8 +2599,9 @@ if (orderSchedule.getValue() == true) {
 	py.run("update_factory_status(False)");
 }
 
+double hourlyNoise = uniform(1.0, 0.10); // +/- 15% random chaos
 // 2. Calculate your hourly arrival rate dynamically using your variables
-double hourlyRate = orderSchedule.getValue() ? ((p_ArrivalRate / 24.0) * v_macroSeasonalMul * v_microDailyMul) : 0.0;
+double hourlyRate = orderSchedule.getValue() ? ((p_ArrivalRate / 24.0) * v_macroSeasonalMul * v_microDailyMul * hourlyNoise) : 0.0;
 
 // 3. Schedule the exact time for the next arrival using a true Poisson distribution
 if (hourlyRate > 0) {
@@ -2629,7 +2630,7 @@ if (hourlyRate > 0) {
 						</Rate>
 						<Id>1779106389066</Id>
 						<OccurrenceAtTime>false</OccurrenceAtTime>
-						<OccurrenceDate>1772323200000</OccurrenceDate>
+						<OccurrenceDate>1772409600000</OccurrenceDate>
 						<OccurrenceTime Class="CodeUnitValue">
 							<Code><![CDATA[0]]></Code>
 							<Unit Class="TimeUnits"><![CDATA[HOUR]]></Unit>
@@ -2640,7 +2641,26 @@ if (hourlyRate > 0) {
 						</RecurrenceCode>
 						<Condition><![CDATA[false]]></Condition>
 					</Properties>
-					<Action><![CDATA[v_competitorPrice = uniform(200, 300);]]></Action>
+					<Action><![CDATA[double currentHour = time();
+int currentDay = ((int)(currentHour / 24)) % 365;
+
+double compBasePrice = 210.0;
+double compPriceSwingRange = 25.0;
+
+double compPriceRadians = 2 * Math.PI * (currentDay - 15) / 365;
+//peak in winter
+double peakSeasons = -compPriceSwingRange * Math.cos(compPriceRadians);
+
+//higher variance to show they are less stable
+double compStandardDeviation = 4.0; 
+double compMean = 0.0;
+double compMarketNoise = normal(compMean, compStandardDeviation);
+
+v_competitorPrice = compBasePrice + peakSeasons + compMarketNoise;
+
+if (v_competitorPrice < 130.0) {
+    v_competitorPrice = 130.0;
+}]]></Action>
 				</Event>
 				<Event>
 					<Id>1779278503885</Id>
@@ -2661,7 +2681,7 @@ if (hourlyRate > 0) {
 						</Rate>
 						<Id>1779278503883</Id>
 						<OccurrenceAtTime>false</OccurrenceAtTime>
-						<OccurrenceDate>1772323200000</OccurrenceDate>
+						<OccurrenceDate>1772409600000</OccurrenceDate>
 						<OccurrenceTime Class="CodeUnitValue">
 							<Code><![CDATA[0]]></Code>
 							<Unit Class="TimeUnits"><![CDATA[HOUR]]></Unit>
@@ -15006,7 +15026,7 @@ else if(p_targetCenter == 3) truckGreen.setVisible(true);]]></StartupCode>
 			</PresentationProperties>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Never]]></StopOption>
-				<InitialDate><![CDATA[1772323200000]]></InitialDate>
+				<InitialDate><![CDATA[1772409600000]]></InitialDate>
 				<InitialTime><![CDATA[0.0]]></InitialTime>
 				<FinalDate><![CDATA[1776556800000]]></FinalDate>
 				<FinalTime><![CDATA[100.0]]></FinalTime>

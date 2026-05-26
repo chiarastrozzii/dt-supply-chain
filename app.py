@@ -7,6 +7,16 @@ import socket
 from streamlit_autorefresh import st_autorefresh
 import plotly.graph_objects as go
 
+import sys
+import os
+
+current_folder = os.path.dirname(os.path.abspath(__file__))
+
+if current_folder not in sys.path:
+    sys.path.append(current_folder)
+
+from forecast_engine import generate_forecast
+
 @st.cache_resource
 def get_global_list():
     return []
@@ -91,7 +101,14 @@ with col_title:
     if shared_data_list:
         latest_entry = shared_data_list[-1]
         sim_date_str = latest_entry.get("SimulationDate", "N/A")
-        clean_date = " ".join(sim_date_str.split(" ")[:4])
+        try:
+            parts = sim_date_str.split(" ")
+            if len(parts) >= 6:
+                clean_date = f"{parts[1]} {parts[2]} {parts[5]} {parts[3]}"
+            else:
+                clean_date = sim_date_str
+        except:
+            clean_date = sim_date_str
         st.markdown(f"""
             <div style='text-align: left; color: #5D5D5D; font-size: 1.2em;'>
                 <strong>SIMULATION TIME</strong><br>
@@ -158,6 +175,18 @@ is_working_now = shared_status.get("is_working", False)
 status_color = "#079d68" if is_working_now else "#ff4b4b"
 status_text = "ACTIVE" if is_working_now else "OFF SHIFT"
 st.sidebar.markdown(f"Current Status: <strong style='color:{status_color};'>{status_text}</strong>", unsafe_allow_html=True)
+
+st.sidebar.header("Prophet Forecasting Engine")
+st.sidebar.caption(
+    "Triggers a multivariate demand forecast based on the historical data stream. "
+    "Ensure the simulation has run for at least 30 unique days (2 years recommended) "
+    "to capture full seasonal trends."
+)
+st.sidebar.warning(
+    "**Crucial:** Stop the simulation execution before generating the forecast "
+    "to ensure complete dataset processing."
+)
+run_prediction = st.sidebar.button("Generate 1-Year Demand Forecast")
 
 current_data = globals()['shared_data_list']  # Access the global list directly
 
@@ -353,3 +382,94 @@ if current_data:
         st.dataframe(df.tail(10), width='stretch')
 else:
     st.info("Waiting for first POST request from AnyLogic... Start the simulation to begin.")
+
+st.markdown("<div id='forecast_section' style='position:absolute; height:0; width:0; margin:0; padding:0; border:none;'></div>", unsafe_allow_html=True)
+
+if 'forecast_generated' not in st.session_state:
+    st.session_state['forecast_generated'] = False
+if 'cached_forecast' not in st.session_state:
+    st.session_state['cached_forecast'] = None
+if 'cached_historical' not in st.session_state:
+    st.session_state['cached_historical'] = None
+
+if run_prediction:
+    st.session_state['forecast_generated'] = True
+
+    with st.spinner("Training Prophet model and generating forecast"):
+        try:
+            if os.path.exists("results.csv"):
+                    raw_df = pd.read_csv("results.csv")
+   
+                    price_col = 'ProductPrice' if 'ProductPrice' in raw_df.columns else 'product_price'
+                    comp_price_col = 'CompetitorPrice' if 'CompetitorPrice' in raw_df.columns else 'competitor_price'
+                    market_idx_col = 'MarketIndex' if 'MarketIndex' in raw_df.columns else 'market_index'
+                    
+                    raw_df = raw_df.dropna(subset=[price_col, comp_price_col, market_idx_col])
+                    raw_df.to_csv("results.csv", index=False)
+            
+            forecast, model, historical_data = generate_forecast("results.csv", forecast_periods=365)
+
+            if forecast is not None:
+                for col in ['yhat', 'yhat_lower', 'yhat_upper']:
+                    forecast[col] = forecast[col].clip(lower=0)
+
+                st.session_state['cached_forecast'] = forecast
+                st.session_state['cached_historical'] = historical_data
+            else:
+                st.error("Could not generate forecast data.")
+                st.session_state['forecast_generated'] = False
+        except Exception as e:
+            st.error(f"Error generating forecast: {e}")
+            st.session_state['forecast_generated'] = False
+
+
+if st.session_state['forecast_generated']:
+    st.html("<script>window.parent.document.getElementById('forecast_section').scrollIntoView({behavior: 'smooth'});</script>")
+
+    st.markdown("---")
+    st.subheader("Order Demand Forecast (Next 365 Days)")
+    
+    forecast = st.session_state['cached_forecast']
+    historical_data = st.session_state['cached_historical']
+
+    max_hist_date = historical_data['ds'].max()
+    historical_pred = forecast[forecast['ds'] <= max_hist_date]
+    future_pred = forecast[forecast['ds'] > max_hist_date].copy()
+
+    future_start_date = future_pred['ds'].min()
+    future_end_date = future_pred['ds'].max()
+
+    fig_forecast = go.Figure()
+
+    # Shaded Confidence Margin (80%)
+    fig_forecast.add_trace(go.Scatter(
+        x=pd.concat([future_pred['ds'], future_pred['ds'].iloc[::-1]]),
+        y=pd.concat([future_pred['yhat_upper'], future_pred['yhat_lower'].iloc[::-1]]),
+        fill='toself',
+        fillcolor='#89cff0',
+        line=dict(color='rgba(255,255,255,0)'),
+        hoverinfo="skip",
+        name='Confidence Margin (80%)'
+    ))
+
+    # Predicted Future Demand Line
+    fig_forecast.add_trace(go.Scatter(
+        x=future_pred['ds'], 
+        y=future_pred['yhat'],
+        mode='lines',
+        name='Predicted Demand',
+        line=dict(color='#007fff', width=3.5, shape='spline')
+    ))
+
+    fig_forecast.update_layout(
+        template='plotly_dark',
+        xaxis_title='Timeline Calendar Date (Zoomed to 1-Year Horizon)',
+        yaxis_title='Daily Order Volumes (Counts)',
+        hovermode='x unified',
+        height=500,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=40, r=40, t=40, b=40),
+        xaxis=dict(range=[future_start_date, future_end_date])
+    )
+
+    st.plotly_chart(fig_forecast, width='stretch')
