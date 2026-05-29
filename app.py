@@ -6,9 +6,9 @@ import threading
 import socket
 from streamlit_autorefresh import st_autorefresh
 import plotly.graph_objects as go
-
 import sys
 import os
+import numpy as np
 
 current_folder = os.path.dirname(os.path.abspath(__file__))
 
@@ -350,14 +350,12 @@ if current_data:
 
                 fig_price = go.Figure()
 
-                # Competitor line
                 fig_price.add_trace(go.Scatter(
                     x=weekly_prices['DateTime'], y=weekly_prices['CompetitorPrice'],
                     name='Competitor Avg Price',
                     line=dict(color='#ED1B24', width=3, shape='hv')
                 ))
 
-                # Our Price line
                 fig_price.add_trace(go.Scatter(
                     x=weekly_prices['DateTime'], y=weekly_prices['ProductPrice'],
                     name='Our Avg Price',
@@ -391,6 +389,8 @@ if 'cached_forecast' not in st.session_state:
     st.session_state['cached_forecast'] = None
 if 'cached_historical' not in st.session_state:
     st.session_state['cached_historical'] = None
+if 'cached_metrics' not in st.session_state:
+    st.session_state['cached_metrics'] = None
 
 forecast_container = st.container()
 
@@ -409,7 +409,7 @@ if run_prediction:
                     raw_df = raw_df.dropna(subset=[price_col, comp_price_col, market_idx_col])
                     raw_df.to_csv("results.csv", index=False)
             
-            forecast, model, historical_data = generate_forecast("results.csv", forecast_periods=365)
+            forecast, model, historical_data, metrics_dict = generate_forecast("results.csv", forecast_periods=365)
 
             if forecast is not None:
                 for col in ['yhat', 'yhat_lower', 'yhat_upper']:
@@ -417,6 +417,8 @@ if run_prediction:
 
                 st.session_state['cached_forecast'] = forecast
                 st.session_state['cached_historical'] = historical_data
+                st.session_state['cached_metrics'] = metrics_dict
+
             else:
                 st.error("Could not generate forecast data.")
                 st.session_state['forecast_generated'] = False
@@ -432,6 +434,7 @@ if st.session_state['forecast_generated'] and st.session_state['cached_forecast'
 
         forecast = st.session_state['cached_forecast']
         historical_data = st.session_state['cached_historical']
+        metrics = st.session_state['cached_metrics']
 
         max_hist_date = historical_data['ds'].max()
         historical_pred = forecast[forecast['ds'] <= max_hist_date]
@@ -475,3 +478,92 @@ if st.session_state['forecast_generated'] and st.session_state['cached_forecast'
         )
 
         st.plotly_chart(fig_forecast, width='stretch')
+
+        st.markdown("### Forecast Accuracy Metrics")
+
+        kpi_col1, kpi_col2, kpi_col3 = st.columns(3)
+        with kpi_col1:
+            st.metric(
+                label="Mean Absolute Error (MAE)", 
+                value=f"{metrics['MAE']} orders",
+                help="The average amount your forecast models miss daily targets. Closer to 0 is perfect."
+            )
+        
+        with kpi_col2:
+            st.metric(
+                label="Root Mean Square Error (RMSE)", 
+                value=f"{metrics['RMSE']} orders",
+                help="Measures large prediction errors. Heavily factors occasional massive market shifts."
+            )
+
+        with kpi_col3:
+            st.metric(
+                label="Historical Training Data Size", 
+                value=f"{metrics['TotalTrainingDays']} Days",
+                help="The aggregate sample width of simulated operational logs parsed by Prophet."
+            )
+
+        y_true_vals = historical_data['y'].values
+        y_pred_vals = forecast[forecast['ds'] <= max_hist_date]['yhat'].values
+        daily_errors = np.abs(y_true_vals - y_pred_vals)
+
+        fig_error = go.Figure()
+
+        fig_error.add_trace(go.Histogram(
+            x=daily_errors,
+            xbins=dict(
+                start=0.0,
+                size=0.15
+            ),
+            name='Daily Prediction Errors',
+            marker_color='#29AB87',
+            opacity=0.85,
+            marker_line=dict(color='rgba(255,255,255,0.2)', width=1)
+        ))
+
+        fig_error.add_trace(go.Scatter(
+            x=[None], y=[None], mode='lines',
+            line=dict(color='#318CE7', width=3),
+            name=f'MAE Baseline ({metrics["MAE"]})'
+        ))
+        
+        fig_error.add_trace(go.Scatter(
+            x=[None], y=[None], mode='lines',
+            line=dict(color='#ED1B24', width=3, dash='dash'),
+            name=f'RMSE Baseline ({metrics["RMSE"]})'
+        ))
+
+        fig_error.add_vline(
+            x=metrics['MAE'], 
+            line_width=3, 
+            line_dash="solid", 
+            line_color="#318CE7",
+            annotation_text=f"MAE: {metrics['MAE']}",
+            annotation_position="top left"
+        )
+
+        fig_error.add_vline(
+            x=metrics['RMSE'], 
+            line_width=3, 
+            line_dash="dash", 
+            line_color="#ED1B24",
+            annotation_text=f"RMSE: {metrics['RMSE']}",
+            annotation_position="top right"
+        )
+
+        fig_error.update_layout(
+            template='plotly_dark',
+            title=dict(
+                text="<b>Forecast Error Variance Profile</b>",
+                font=dict(size=14)
+            ),
+            xaxis_title='Absolute Error Magnitude (Orders Deviation)',
+            yaxis_title='Frequency (Number of Days Mapping This Error)',
+            height=400,
+            showlegend=True,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(l=40, r=40, t=50, b=40),
+            bargap=0.05
+        )
+
+        st.plotly_chart(fig_error, width='stretch')
