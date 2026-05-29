@@ -3,6 +3,8 @@ from prophet import Prophet
 import os
 import matplotlib.pyplot as plt
 from datetime import datetime
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+import numpy as np
 
 def generate_forecast(data_path, forecast_periods):
     if not os.path.exists(data_path):
@@ -39,7 +41,6 @@ def generate_forecast(data_path, forecast_periods):
     comp_price_col = 'CompetitorPrice' if 'CompetitorPrice' in df.columns else 'competitor_price'
     market_idx_col = 'MarketIndex' if 'MarketIndex' in df.columns else 'market_index'
 
-    #compress raw orders down into distinct, structured day steps
     daily_data = df.groupby('ds').agg(
         y=('OrderCreationTime', 'size'),
         our_price=(price_col, 'mean'),
@@ -63,7 +64,6 @@ def generate_forecast(data_path, forecast_periods):
         print("⚠️ Simulation has not run for enough unique days to calculate trends.")
         return None, None, None
 
-    # 5. Initialize Prophet Causal Architecture
     model = Prophet(
         growth='linear',
         yearly_seasonality=True,
@@ -98,7 +98,22 @@ def generate_forecast(data_path, forecast_periods):
 
     forecast = model.predict(future)
 
-    return forecast, model, daily_data
+    max_hist_date = daily_data['ds'].max()
+    hisotircal_pred = forecast[forecast['ds'] <= max_hist_date]
+
+    y_data = daily_data['y'].values
+    y_pred = hisotircal_pred['yhat'].values
+
+    mae = mean_absolute_error(y_data, y_pred)   
+    rmse = np.sqrt(mean_squared_error(y_data, y_pred))
+
+    metrics_dict = {
+        'MAE': round(float(mae), 4),
+        'RMSE': round(float(rmse), 4),
+        'TotalTrainingDays': len(daily_data)
+    }
+
+    return forecast, model, daily_data, metrics_dict
 
 if __name__ == "__main__":
     print("running local test for forecast_engine.py...")
@@ -110,8 +125,8 @@ if __name__ == "__main__":
         print("   Please make sure the file is in this folder, or update TEST_DATA_PATH.")
     else:
         try:
-            forecast, model, historical_daily = generate_forecast(TEST_DATA_PATH, forecast_periods=365)
-            
+            forecast, model, historical_daily, metrics_dict = generate_forecast(TEST_DATA_PATH, forecast_periods=365)
+
             if forecast is not None:
                 print("\n✅ SUCCESS! Prophet Model trained and forecast generated.")
                 print(f"Historical data covered: {historical_daily['ds'].min()} to {historical_daily['ds'].max()}")
@@ -121,11 +136,16 @@ if __name__ == "__main__":
                 
                 print("\n📋 Sample of Next Week's Predicted Order Volumes:")
                 print(future_df[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].head(7).to_string(index=False))
-            
-                #print("\n📊 Displaying diagnostic plot...")
-                #fig = model.plot(forecast)
-                #import matplotlib.pyplot as plt
-                #plt.show()
+
+                y_true = historical_daily['y'].values
+                y_pred = forecast[forecast['ds'] <= historical_daily['ds'].max()]['yhat'].values
+
+                mae_score = round(float(mean_absolute_error(y_true, y_pred)), 4)
+                rmse_score = round(float(np.sqrt(mean_squared_error(y_true, y_pred))), 4)
+
+                print("\n📐 MODEL ACCURACY EVALUATION:")
+                print(f"   Mean Absolute Error (MAE): {mae_score} orders")
+                print(f"   Root Mean Square Error (RMSE): {rmse_score} orders")
 
                 output_folder = "forecast_csv"
                 if not os.path.exists(output_folder):
@@ -143,7 +163,13 @@ if __name__ == "__main__":
                 final_column_order = ['ds', 'actual_volume', 'yhat', 'yhat_lower', 'yhat_upper']
                 complete_export_df = complete_export_df[final_column_order]
 
-                complete_export_df.to_csv(csv_filename, index=False)
+                with open(csv_filename, 'w') as f:
+                    f.write(f"# Export Timestamp: {timestamp_str}\n")
+                    f.write(f"# Model Accuracy: MAE = {mae_score}\n")
+                    f.write(f"# Model Accuracy: RMSE = {rmse_score}\n")
+                    f.write(f"# Total Training Set Sample Size: {len(historical_daily)} days\n")
+
+                complete_export_df.to_csv(csv_filename, mode='a', index=False)
                 print(f"Forecast csv exported to: {csv_filename}")
 
                 fig, ax = plt.subplots(figsize=(12, 6))
