@@ -20,7 +20,7 @@
 			<Name><![CDATA[Main]]></Name>
 			<Import><![CDATA[import java.util.Scanner;]]></Import>
 			<StartupCode><![CDATA[try {
-   	results.println("OrderID,TargetCenter,LogicCenterName,WaitOrder,WaitLogicCenter,Distance,ProcessingTime,FinishTime,CO2PerOrder,CarbonRatio,MarketIndex,CompetitorPrice,ProductPrice,PriceDifference,activeFloorLorries");
+   	results.println("OrderID,TargetCenter,LogicCenterName,WaitOrder,WaitLogicCenter,Distance,ProcessingTime,OrderCreationTime,FinishTime,CO2PerOrder,CarbonRatio,MarketIndex,CompetitorPrice,ProductPrice,PriceDifference,activeFloorLorries");
    	traceln("results file ready");
     String path = "config.json"; 
     String content = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(path)));
@@ -3814,6 +3814,8 @@ assembler.set_quantity4(agent.p_C3);]]></Code>
 
 	agent.p_custLat = uniform(44.5, 47.0); //create orders from location of the map, stochastic
 	agent.p_custLon = uniform(7.5, 14.0);
+	
+	agent.p_creationDate = date();
 
 	agent.p_priority = (int)uniform_discr(1, 3);
 	agent.p_deliveryDeadline = time() + 24;
@@ -4721,6 +4723,7 @@ agent.p_targetCenter = v_processingOrder.p_targetCenter;
 agent.p_finalDistance = v_processingOrder.p_finalDistance;
 agent.p_startTime = v_processingOrder.p_startTime;
 agent.p_C4 = v_processingOrder.p_C4;
+agent.p_orderCreationDate = v_processingOrder.p_creationDate;
 
 agent.setLatLon(productionFloor.getLatitude(), productionFloor.getLongitude());
 
@@ -5100,6 +5103,7 @@ agent.p_targetCenter = v_currentWIP1.p_targetCenter;
 agent.p_finalDistance = v_currentWIP1.p_finalDistance;
 agent.p_startTime = v_currentWIP1.p_startTime;
 agent.v_waitOrder = v_currentWIP1.v_waitOrder;
+agent.p_orderCreationDate = v_currentWIP1.p_orderCreationDate;
 
 double leadTime = time() - v_currentWIP1.p_startTime;
 
@@ -5920,6 +5924,7 @@ agent.p_targetCenter = v_currentWIP2.p_targetCenter;
 agent.p_finalDistance = v_currentWIP2.p_finalDistance;
 agent.p_startTime = v_currentWIP2.p_startTime;
 agent.v_waitOrder = v_currentWIP2.v_waitOrder;
+agent.p_orderCreationDate = v_currentWIP2.p_orderCreationDate;
 
 double leadTime = time() - v_currentWIP2.p_startTime;
 
@@ -6299,6 +6304,7 @@ agent.p_targetCenter = v_currentWIP3.p_targetCenter;
 agent.p_finalDistance = v_currentWIP3.p_finalDistance;
 agent.p_startTime = v_currentWIP3.p_startTime;
 agent.v_waitOrder = v_currentWIP3.v_waitOrder;
+agent.p_orderCreationDate = v_currentWIP3.p_orderCreationDate;
 
 double leadTime = time() - v_currentWIP3.p_startTime;
 
@@ -7159,6 +7165,7 @@ results.println(
     agent.v_waitLogicCenter + "," +  
     agent.p_finalDistance + "," + 
     (time() - agent.p_startTime) + "," +
+    agent.p_orderCreationDate + "," +
     date() + "," + 
     agent.v_CO2Footprint + "," +
     carbonRatio + "," +
@@ -13520,6 +13527,27 @@ double tripCO2 = distKm * p_emissionFactor;
 						</ParameterEditor>
 					</Properties>                 
 				</Variable>
+				<Variable Class="Parameter">
+					<Id>1779982254878</Id>
+					<Name><![CDATA[p_creationDate]]></Name>
+					<X>330</X><Y>190</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[Date]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<ParameterEditor>
+							<Id>1779982254876</Id>
+							<EditorContolType>CALENDAR</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
 			</Variables>
 			<AgentLinks>
 				<AgentLink>
@@ -14343,6 +14371,27 @@ else if(p_targetCenter == 3) truckGreen.setVisible(true);]]></StartupCode>
 						</ParameterEditor>
 					</Properties>                 
 				</Variable>
+				<Variable Class="Parameter">
+					<Id>1779982368701</Id>
+					<Name><![CDATA[p_orderCreationDate]]></Name>
+					<X>340</X><Y>150</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[Date]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<ParameterEditor>
+							<Id>1779982368699</Id>
+							<EditorContolType>CALENDAR</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
 			</Variables>
 			<AgentLinks>
 				<AgentLink>
@@ -14858,6 +14907,27 @@ else if(p_targetCenter == 3) truckGreen.setVisible(true);]]></StartupCode>
 						<ParameterEditor>
 							<Id>1778664393916</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1779982395211</Id>
+					<Name><![CDATA[p_orderCreationDate]]></Name>
+					<X>430</X><Y>120</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[Date]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<ParameterEditor>
+							<Id>1779982395209</Id>
+							<EditorContolType>CALENDAR</EditorContolType>
 							<MinSliderValue><![CDATA[0]]></MinSliderValue>
 							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
 							<DelimeterType>NO_DELIMETER</DelimeterType>

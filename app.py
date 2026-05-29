@@ -392,6 +392,8 @@ if 'cached_forecast' not in st.session_state:
 if 'cached_historical' not in st.session_state:
     st.session_state['cached_historical'] = None
 
+forecast_container = st.container()
+
 if run_prediction:
     st.session_state['forecast_generated'] = True
 
@@ -423,53 +425,53 @@ if run_prediction:
             st.session_state['forecast_generated'] = False
 
 
-if st.session_state['forecast_generated']:
-    st.html("<script>window.parent.document.getElementById('forecast_section').scrollIntoView({behavior: 'smooth'});</script>")
+if st.session_state['forecast_generated'] and st.session_state['cached_forecast'] is not None:
+    with forecast_container:
+        st.markdown("---")
+        st.subheader("Order Demand Forecast (Next 365 Days)")
 
-    st.markdown("---")
-    st.subheader("Order Demand Forecast (Next 365 Days)")
-    
-    forecast = st.session_state['cached_forecast']
-    historical_data = st.session_state['cached_historical']
+        forecast = st.session_state['cached_forecast']
+        historical_data = st.session_state['cached_historical']
 
-    max_hist_date = historical_data['ds'].max()
-    historical_pred = forecast[forecast['ds'] <= max_hist_date]
-    future_pred = forecast[forecast['ds'] > max_hist_date].copy()
+        max_hist_date = historical_data['ds'].max()
+        historical_pred = forecast[forecast['ds'] <= max_hist_date]
+        future_pred = forecast[forecast['ds'] > max_hist_date].copy()
 
-    future_start_date = future_pred['ds'].min()
-    future_end_date = future_pred['ds'].max()
+        future_start_date = future_pred['ds'].min()
+        future_end_date = future_pred['ds'].max()
 
-    fig_forecast = go.Figure()
+        fig_forecast = go.Figure()
 
-    # Shaded Confidence Margin (80%)
-    fig_forecast.add_trace(go.Scatter(
-        x=pd.concat([future_pred['ds'], future_pred['ds'].iloc[::-1]]),
-        y=pd.concat([future_pred['yhat_upper'], future_pred['yhat_lower'].iloc[::-1]]),
-        fill='toself',
-        fillcolor='#89cff0',
-        line=dict(color='rgba(255,255,255,0)'),
-        hoverinfo="skip",
-        name='Confidence Margin (80%)'
-    ))
+        fig_forecast.add_trace(go.Scatter(
+            x=pd.concat([future_pred['ds'], future_pred['ds'].iloc[::-1]]),
+            y=pd.concat([future_pred['yhat_upper'], future_pred['yhat_lower'].iloc[::-1]]),
+            fill='toself',
+            fillcolor='#89cff0',
+            line=dict(color='rgba(255,255,255,0)'),
+            opacity=0.3,
+            hoverinfo="skip",
+            name='Confidence Margin (80%)'
+        ))
 
-    # Predicted Future Demand Line
-    fig_forecast.add_trace(go.Scatter(
-        x=future_pred['ds'], 
-        y=future_pred['yhat'],
-        mode='lines',
-        name='Predicted Demand',
-        line=dict(color='#007fff', width=3.5, shape='spline')
-    ))
+        fig_forecast.add_trace(go.Bar(
+            x=future_pred['ds'], 
+            y=future_pred['yhat'],
+            name='Predicted Demand',
+            marker_color='#007fff',
+            opacity=0.85,
+            marker_line_width=0
+        ))
 
-    fig_forecast.update_layout(
-        template='plotly_dark',
-        xaxis_title='Timeline Calendar Date (Zoomed to 1-Year Horizon)',
-        yaxis_title='Daily Order Volumes (Counts)',
-        hovermode='x unified',
-        height=500,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=40, r=40, t=40, b=40),
-        xaxis=dict(range=[future_start_date, future_end_date])
-    )
+        fig_forecast.update_layout(
+            template='plotly_dark',
+            xaxis_title='Timeline Calendar Date (Zoomed to 1-Year Horizon)',
+            yaxis_title='Daily Order Volumes (Counts)',
+            hovermode='x unified',
+            barmode='overlay',
+            height=500,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(l=40, r=40, t=40, b=40),
+            xaxis=dict(range=[future_start_date, future_end_date])
+        )
 
-    st.plotly_chart(fig_forecast, width='stretch')
+        st.plotly_chart(fig_forecast, width='stretch')

@@ -1,6 +1,8 @@
 import pandas as pd 
 from prophet import Prophet
 import os
+import matplotlib.pyplot as plt
+from datetime import datetime
 
 def generate_forecast(data_path, forecast_periods):
     if not os.path.exists(data_path):
@@ -23,11 +25,11 @@ def generate_forecast(data_path, forecast_periods):
             pass
         return None
 
-    if 'FinishTime' in df.columns:
-        df['CleanedTime'] = df['FinishTime'].apply(parse_anylogic_date)
+    if 'OrderCreationTime' in df.columns:
+        df['CleanedTime'] = df['OrderCreationTime'].apply(parse_anylogic_date)
         df['SimTime'] = pd.to_datetime(df['CleanedTime'], errors='coerce')
     else:
-        df['SimTime'] = pd.to_datetime("2026-03-02") + pd.to_timedelta(df['FinishTime'].astype(int), unit='h')
+        df['SimTime'] = pd.to_datetime("2026-03-02") + pd.to_timedelta(df['OrderCreationTime'].astype(int), unit='h')
 
     df = df.dropna(subset=['SimTime'])
 
@@ -39,7 +41,7 @@ def generate_forecast(data_path, forecast_periods):
 
     #compress raw orders down into distinct, structured day steps
     daily_data = df.groupby('ds').agg(
-        y=('FinishTime', 'size'),
+        y=('OrderCreationTime', 'size'),
         our_price=(price_col, 'mean'),
         comp_price=(comp_price_col, 'mean'),
         market_index=(market_idx_col, 'mean') 
@@ -119,12 +121,82 @@ if __name__ == "__main__":
                 
                 print("\n📋 Sample of Next Week's Predicted Order Volumes:")
                 print(future_df[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].head(7).to_string(index=False))
+            
+                #print("\n📊 Displaying diagnostic plot...")
+                #fig = model.plot(forecast)
+                #import matplotlib.pyplot as plt
+                #plt.show()
+
+                output_folder = "forecast_csv"
+                if not os.path.exists(output_folder):
+                    os.makedirs(output_folder)
+  
+                timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+                csv_filename = os.path.join(output_folder, f"demand_forecast_{timestamp_str}.csv")
+
+                export_cols = ['ds', 'yhat', 'yhat_lower', 'yhat_upper']
+                forecast_subset = forecast[export_cols].copy()
+
+                history_subset = historical_daily[['ds', 'y']].rename(columns={'y': 'actual_volume'})
+                complete_export_df = pd.merge(forecast_subset, history_subset, on='ds', how='left')
+
+                final_column_order = ['ds', 'actual_volume', 'yhat', 'yhat_lower', 'yhat_upper']
+                complete_export_df = complete_export_df[final_column_order]
+
+                complete_export_df.to_csv(csv_filename, index=False)
+                print(f"Forecast csv exported to: {csv_filename}")
+
+                fig, ax = plt.subplots(figsize=(12, 6))
+ 
+                max_hist_date = historical_daily['ds'].max()
+                historical_pred = forecast[forecast['ds'] <= max_hist_date]
+                future_pred = forecast[forecast['ds'] > max_hist_date]
+
+                ax.fill_between(
+                    future_pred['ds'], 
+                    future_pred['yhat_lower'], 
+                    future_pred['yhat_upper'], 
+                    color='#89cff0', 
+                    alpha=0.3, 
+                    label='Confidence Margin (80%)'
+                )
+
+                ax.scatter(
+                    historical_daily['ds'],
+                    historical_daily['y'],
+                    color='#3EB489',
+                    s=8, 
+                    alpha=0.6, 
+                    label='Observed History (Order Creation Date)'
+                )
+
+                ax.bar(
+                    historical_pred['ds'], 
+                    historical_pred['yhat'], 
+                    color='#29AB87',
+                    width=1.5,
+                    label='Fitted History (Model Prediction)'
+                )
+
+                ax.bar(
+                    future_pred['ds'], 
+                    future_pred['yhat'], 
+                    color='#318CE7',
+                    width=1.5,
+                    label='Predicted Future Demand'
+                )
+
+                ax.set_title("Supply Chain Demand Forecast", fontsize=14, fontweight='bold', pad=15)
+                ax.set_xlabel("Timeline Calendar Date", fontsize=11, labelpad=10)
+                ax.set_ylabel("Daily Order Volumes (Counts)", fontsize=11, labelpad=10)
                 
-                # Optional: Uncomment the lines below if you want a quick diagnostic plot to open on your desktop
-                print("\n📊 Displaying diagnostic plot...")
-                fig = model.plot(forecast)
-                import matplotlib.pyplot as plt
+                ax.legend(loc='upper right', frameon=True, facecolor='white', edgecolor='lightgrey', fontsize=9)
+                ax.grid(True, linestyle='--', alpha=0.5, color='lightgrey')
+
+                plt.gcf().autofmt_xdate()
+
+                plt.tight_layout()
                 plt.show()
-                
+
         except Exception as e:
             print(f"❌ An error occurred during the test run: {e}")
