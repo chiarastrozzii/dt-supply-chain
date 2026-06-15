@@ -231,13 +231,6 @@ if current_data:
 
     if 'WaitOrder' in df.columns:
         st.subheader("Real Time Order Processing Delay")
-        #fig = px.line(df, x=df.index, y="WaitOrder", 
-        #              #title="Real-Time Order Wait Times for Processing",
-        #              template="plotly_dark",
-        #              line_shape="spline",
-        #              hover_data={"OrderID": True, "WaitOrder": ':.2f'})
-        #
-        #fig.update_traces(line_color='#00d4ff', line_width=3)
         fig = px.histogram(df, 
                            x="WaitOrder", 
                            nbins=40,
