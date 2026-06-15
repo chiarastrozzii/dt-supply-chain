@@ -80,8 +80,8 @@ def read_forecast_csv():
             f"FORECAST SUMMARY ENGINE (File: {os.path.basename(latest_file)}):\n"
             f"- Total timeline scope: {len(df)} days\n"
             f"- Future prediction window: {len(future_predictions)} days out\n\n"
-            f"--- NEXT 10 DAYS EXPECTED DEMAND FORECAST OVERVIEW ---\n"
-            f"{future_predictions[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].head(10).to_string(index=False)}"
+            f"--- NEXT 30 DAYS EXPECTED DEMAND FORECAST OVERVIEW ---\n"
+            f"{future_predictions[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].head(30).to_string(index=False)}"
         )
     except Exception as e:
         return f"Error parsing forecast file: {str(e)}"
@@ -105,19 +105,15 @@ def check_transportation_capacity_prompt():
 def run_mcp_agent(prompt: str) -> str:
     prompt_lower = prompt.lower()
     
-    # 1. Deterministic Macro Routing (Fast, zero API cost, completely reliable)
     if "waiting times" in prompt_lower or "bottlenecks" in prompt_lower:
         return order_waiting_metrics()
         
-    elif "demand forecast" in prompt_lower or "next month" in prompt_lower:
-        # Returns the prescriptive workforce text directly
-        return get_logistic_center_impact()
-        
     elif "three months" in prompt_lower or "fleet capacity" in prompt_lower:
-        # Returns the transportation agency evaluation text directly
         return check_transportation_capacity()
+
+    elif "demand forecast" in prompt_lower or ("next month" in prompt_lower and "three" not in prompt_lower):
+        return get_logistic_center_impact()
     
-    # 2. Fallback to standard OpenAI LLM if the user types a custom question
     gh_token = os.environ.get("GITHUB_TOKEN")
     if not gh_token:
         return "⚠️ Setup Error: GITHUB_TOKEN environment variable is missing!"
@@ -161,7 +157,10 @@ def run_mcp_agent(prompt: str) -> str:
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"Error gathering AI response: {str(e)}"
+        err = str(e)
+        if "429" in err or "rate" in err.lower():
+            return "⚠️ Rate limit hit on GitHub Models API. Wait a moment and retry."
+        return f"Error gathering AI response: {err}"
 
 if __name__ == "__main__":
     mcp.run()

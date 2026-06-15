@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import sys
 import os
 import numpy as np
+import time
 from prescriptive.orchestrator import run_mcp_agent
 current_folder = os.path.dirname(os.path.abspath(__file__))
 
@@ -100,6 +101,8 @@ if 'show_assistant' not in st.session_state:
     st.session_state.show_assistant = False
 if "active_prompt" not in st.session_state:
     st.session_state.active_prompt = None
+if 'pending_response' not in st.session_state:
+    st.session_state.pending_response = False
 
 col_title, col_emoji = st.columns([0.9, 0.1])
 with col_title:
@@ -197,7 +200,7 @@ run_prediction = st.sidebar.button("Generate 1-Year Demand Forecast")
 
 st.sidebar.markdown("---") 
 st.sidebar.header("Got a question? Ask the AI assistant!")
-if st.sidebar.button("Open AI Assistant Chat", type="primary", use_container_width=True):
+if st.sidebar.button("Open AI Assistant Chat", type="primary", width='stretch'):
     st.session_state.show_assistant = not st.session_state.show_assistant
     st.rerun()
 
@@ -580,49 +583,65 @@ if st.session_state['forecast_generated'] and st.session_state['cached_forecast'
 
         st.plotly_chart(fig_error, width='stretch')
 
-# --- AUTO-REFRESH RESILIENT CHAT MATRIX ---
 if st.session_state.show_assistant:
     st.markdown("---")
     st.markdown("### Real-Time Metrics AI Assistant")
     
-    st.markdown("<p style='font-size: 13px; font-weight: bold; color: #007fff; margin-bottom: 5px;'>📋 QUICK MACRO COMMANDS</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 13px; font-weight: bold; color: #007fff; margin-bottom: 5px;'>QUICK MACRO COMMANDS</p>", unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns(3)
 
-    # Pipeline 1: Capture Macro Inputs
     current_query = None
 
     with col1:
-        if st.button("📊 Analyze Bottlenecks", use_container_width=True, key="btn_bottlenecks"):
+        if st.button("Analyze Bottlenecks",
+                    width='stretch',
+                    key="btn_bottlenecks",
+                    icon='❓',
+                    icon_position='right',
+                    help="**Prompt to be sent:**\n\"Please analyze the current order waiting times and provide insights on any bottlenecks that could impact our logistics centers\""):
             current_query = "Please analyze the current order waiting times and provide insights on any bottlenecks that could impact our logistics centers"
             
     with col2:
-        if st.button("🏢 Warehouse Impact", use_container_width=True, key="btn_warehouse"):
+        if st.button("Warehouse Impact",
+                    width='stretch',
+                    key="btn_warehouse",
+                    icon='❓',
+                    icon_position='right',
+                    help="**Prompt to be sent:**\n\"Based on the latest demand forecast, how many orders are expected next month and how will they impact the logistics centers?\""):
             current_query = "Based on the latest demand forecast, how many orders are expected next month and how will they impact the logistics centers?"
     with col3:
-        if st.button("🚛 Fleet Constraints", use_container_width=True, key="btn_fleet"):
-            current_query = "Based on the order volume expected for the next three months, analyze the current transportation fleet capacity."
+        if st.button("Fleet Constraints",
+                    width='stretch',
+                    key="btn_fleet",
+                    icon='❓',
+                    icon_position='right',
+                    help="**Prompt to be sent:**\n\"Based on the order volume expected for the next three months, analyze the current transportation fleet capacity and provide recommendations on whether we need to request more units from the transport agency to handle the expected demand.\""
+                    ):
+            current_query = "Based on the order volume expected for the next three months, analyze the current transportation fleet capacity and provide recommendations on whether we need to request more units from the transport agency to handle the expected demand."
 
-    # Pipeline 2: Capture Custom Written Prompt
     user_input = st.chat_input("Ask a question about real-time metrics...", key="main_chat_input")
     if user_input:
         current_query = user_input
     
-    
     if current_query:
         st.session_state.chat_history.append({"role": "user", "content": current_query})
-        # 2. Run the agent and append response directly to history
+        st.session_state.active_prompt = current_query
+        st.session_state.pending_response = True
+        st.rerun() 
+    
+    if st.session_state.pending_response and st.session_state.active_prompt:
         with st.spinner("Orchestrator parsing metrics via MCP engine..."):
             try:
-                agent_response = run_mcp_agent(current_query)
-                
+                agent_response = run_mcp_agent(st.session_state.active_prompt)
                 if not agent_response or str(agent_response).strip() == "":
-                    agent_response = "Agent executed successfully but returned an empty text string."
-                    
+                    agent_response = "Agent executed successfully but returned an empty string."
                 st.session_state.chat_history.append({"role": "assistant", "content": agent_response})
             except Exception as e:
-                error_msg = f"Exception caught in Execution Pipeline: {str(e)}"
-                st.error(error_msg)
-                st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
+                st.session_state.chat_history.append({"role": "assistant", "content": f"Pipeline error: {str(e)}"})
+            finally:
+                st.session_state.pending_response = False
+                st.session_state.active_prompt = None
         st.rerun()
 
     chat_container = st.container(height=380)
@@ -630,7 +649,7 @@ if st.session_state.show_assistant:
         if not st.session_state.chat_history:
             st.markdown(
                 "<div style='text-align: center; color: #5c6773; padding-top: 100px; font-style: italic;'>"
-                "✨ System Idle. Click a macro button above or type your own custom query to start."
+                "Click a macro button above or ask a question in the text bar below to start."
                 "</div>", 
                 unsafe_allow_html=True
             )
