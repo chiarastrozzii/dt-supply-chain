@@ -28,14 +28,16 @@
     String[] lines = content.split(",");
 
     this.p_ArrivalRate   = (int)Double.parseDouble(lines[0].split(":")[1]);
-    this.p_BufferOrders = (int)Double.parseDouble(lines[1].split(":")[1]);
-    this.p_MaxWaitLimit = Double.parseDouble(lines[2].split(":")[1]);
-    this.p_capacityLC1 = (int)Double.parseDouble(lines[3].split(":")[1]);
-    this.p_capacityLC2 = (int)Double.parseDouble(lines[4].split(":")[1]);
-    this.p_capacityLC3 = (int)Double.parseDouble(lines[5].split(":")[1]);
-    this.p_emissionFactor = Double.parseDouble(lines[6].split(":")[1]);
+    this.p_MaxWaitLimit = Double.parseDouble(lines[1].split(":")[1]);
+    this.p_capacityLC1 = (int)Double.parseDouble(lines[2].split(":")[1]);
+    this.p_capacityLC2 = (int)Double.parseDouble(lines[3].split(":")[1]);
+    this.p_capacityLC3 = (int)Double.parseDouble(lines[4].split(":")[1]);
+    this.p_emissionFactor = Double.parseDouble(lines[5].split(":")[1]);
+    this.p_workersFloor = (int)Double.parseDouble(lines[6].split(":")[1]);
+    this.p_workersLC1 = (int)Double.parseDouble(lines[7].split(":")[1]);
+    this.p_workersLC2 = (int)Double.parseDouble(lines[8].split(":")[1]);
+    this.p_workersLC3 = (int)Double.parseDouble(lines[9].split(":")[1]);
     
-    orderBuffer.set_capacity(this.p_BufferOrders);
     bufferCenter1.set_capacity(this.p_capacityLC1);
     bufferCenter2.set_capacity(this.p_capacityLC2);
     bufferCenter3.set_capacity(this.p_capacityLC3);
@@ -72,14 +74,10 @@
     
     String currentSchedule = getScheduleDescription();
 	py.run("set_schedule_info('" + currentSchedule + "')");
-	
-	eventArrivalTrigger.restart(0, HOUR);
-	
 
 } catch (Exception e) {
     traceln("STARTUP ERROR: " + e.getMessage());
     p_ArrivalRate = 1;
-    p_BufferOrders = 50;
 }]]></StartupCode>
 			<DestroyCode><![CDATA[results.close();]]></DestroyCode>
 			<Generic>false</Generic>
@@ -572,6 +570,21 @@
 						<Type><![CDATA[double]]></Type>        
 					</Properties>
 				</Variable>
+				<Variable Class="PlainVariable">
+					<Id>1781365686583</Id>
+					<Name><![CDATA[hourlyRate]]></Name>
+					<X>90</X><Y>690</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" Constant="false" AccessType="public" StaticVariable="false">
+						<Type><![CDATA[double]]></Type>        
+						<InitialValue Class="CodeValue">
+							<Code><![CDATA[0.0]]></Code>
+						</InitialValue>
+					</Properties>
+				</Variable>
 				<Variable Class="Parameter">
 					<Id>1773933923960</Id>
 					<Name><![CDATA[p_ArrivalRate]]></Name>
@@ -589,30 +602,6 @@
 						</DefaultValue>
 						<ParameterEditor>
 							<Id>1773933923958</Id>
-							<EditorContolType>TEXT_BOX</EditorContolType>
-							<MinSliderValue><![CDATA[0]]></MinSliderValue>
-							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
-							<DelimeterType>NO_DELIMETER</DelimeterType>
-						</ParameterEditor>
-					</Properties>                 
-				</Variable>
-				<Variable Class="Parameter">
-					<Id>1773933961003</Id>
-					<Name><![CDATA[p_BufferOrders]]></Name>
-					<X>130</X><Y>1420</Y>
-					<Label><X>10</X><Y>0</Y></Label>
-					<PublicFlag>false</PublicFlag>
-					<PresentationFlag>true</PresentationFlag>
-					<ShowLabel>true</ShowLabel>
-					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
-						<Type><![CDATA[int]]></Type>
-						<UnitType><![CDATA[NONE]]></UnitType>
-						<SdArray>false</SdArray>
-						<DefaultValue Class="CodeValue">
-							<Code><![CDATA[50]]></Code>
-						</DefaultValue>
-						<ParameterEditor>
-							<Id>1773933961001</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
 							<MinSliderValue><![CDATA[0]]></MinSliderValue>
 							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
@@ -730,6 +719,102 @@
 						<SdArray>false</SdArray>
 						<ParameterEditor>
 							<Id>1777897609156</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1780310752509</Id>
+					<Name><![CDATA[p_workersFloor]]></Name>
+					<X>30</X><Y>1340</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[int]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1780310752507</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1780310802746</Id>
+					<Name><![CDATA[p_workersLC1]]></Name>
+					<X>30</X><Y>1360</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[int]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1780310802744</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1780310815403</Id>
+					<Name><![CDATA[p_workersLC2]]></Name>
+					<X>30</X><Y>1380</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[int]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1780310815401</Id>
+							<EditorContolType>TEXT_BOX</EditorContolType>
+							<MinSliderValue><![CDATA[0]]></MinSliderValue>
+							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
+							<DelimeterType>NO_DELIMETER</DelimeterType>
+						</ParameterEditor>
+					</Properties>                 
+				</Variable>
+				<Variable Class="Parameter">
+					<Id>1780310820653</Id>
+					<Name><![CDATA[p_workersLC3]]></Name>
+					<X>30</X><Y>1400</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties SaveInSnapshot="true" ModificatorType="STATIC">
+						<Type><![CDATA[int]]></Type>
+						<UnitType><![CDATA[NONE]]></UnitType>
+						<SdArray>false</SdArray>
+						<DefaultValue Class="CodeValue">
+							<Code><![CDATA[0]]></Code>
+						</DefaultValue>
+						<ParameterEditor>
+							<Id>1780310820651</Id>
 							<EditorContolType>TEXT_BOX</EditorContolType>
 							<MinSliderValue><![CDATA[0]]></MinSliderValue>
 							<MaxSliderValue><![CDATA[100]]></MaxSliderValue>
@@ -2564,19 +2649,19 @@
 				<Event>
 					<Id>1778076931046</Id>
 					<Name><![CDATA[eventArrivalTrigger]]></Name>
-					<X>90</X><Y>710</Y>
+					<X>90</X><Y>720</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>true</ShowLabel>
-					<Properties TriggerType="timeout" Mode="userControls">
+					<Properties TriggerType="rate" Mode="userControls">
 						<Timeout Class="CodeUnitValue">
 							<Code><![CDATA[0]]></Code>
 							<Unit Class="TimeUnits"><![CDATA[DAY]]></Unit>
 						</Timeout>
 						<Rate Class="CodeUnitValue">
-							<Code><![CDATA[orderSchedule.getValue() ? (p_ArrivalRate * v_macroSeasonalMul * v_microDailyMul) : 0.0]]></Code>
-							<Unit Class="RateUnits"><![CDATA[PER_DAY]]></Unit>
+							<Code><![CDATA[hourlyRate]]></Code>
+							<Unit Class="RateUnits"><![CDATA[PER_HOUR]]></Unit>
 						</Rate>
 						<Id>1778076931044</Id>
 						<OccurrenceAtTime>true</OccurrenceAtTime>
@@ -2591,24 +2676,11 @@
 						</RecurrenceCode>
 						<Condition><![CDATA[false]]></Condition>
 					</Properties>
-					<Action><![CDATA[// 1. If the schedule is active right now, generate an order
-if (orderSchedule.getValue() == true) {
+					<Action><![CDATA[if (orderSchedule.getValue() == true) {
     sourceOrders.inject();
     py.run("update_factory_status(True)");
-}else{
-	py.run("update_factory_status(False)");
-}
-
-double hourlyNoise = uniform(1.0, 0.10); // +/- 15% random chaos
-// 2. Calculate your hourly arrival rate dynamically using your variables
-double hourlyRate = orderSchedule.getValue() ? ((p_ArrivalRate / 24.0) * v_macroSeasonalMul * v_microDailyMul * hourlyNoise) : 0.0;
-
-// 3. Schedule the exact time for the next arrival using a true Poisson distribution
-if (hourlyRate > 0) {
-    double nextArrivalGap = exponential(hourlyRate); // True random arrival gap
-    eventArrivalTrigger.restart(nextArrivalGap, HOUR);
 } else {
-    eventArrivalTrigger.restart(0.25, HOUR); // If off-shift, check back in 15 minutes
+    py.run("update_factory_status(False)");
 }]]></Action>
 				</Event>
 				<Event>
@@ -2649,7 +2721,7 @@ double compPriceSwingRange = 25.0;
 
 double compPriceRadians = 2 * Math.PI * (currentDay - 15) / 365;
 //peak in winter
-double peakSeasons = -compPriceSwingRange * Math.cos(compPriceRadians);
+double peakSeasons = compPriceSwingRange * Math.cos(compPriceRadians);
 
 //higher variance to show they are less stable
 double compStandardDeviation = 4.0; 
@@ -2699,7 +2771,7 @@ double basePrice = 200.0;
 double priceSwingRange = 30.0;
 
 double priceRadians = 2 * Math.PI * (currentDay - 15) / 365;
-double strategicPriceComponent = -priceSwingRange * Math.cos(priceRadians);
+double strategicPriceComponent = priceSwingRange * Math.cos(priceRadians);
 
 double standardDeviation = 2.5; 
 double mean = 0.0;
@@ -2746,21 +2818,55 @@ v_currentHourOfDay = time() % 24;
 
 //peaks in winter and drops in summer
 double yearlyRadians = 2 * Math.PI * (v_currentDayOfYear - 15) / 365;
-v_macroSeasonalMul = Math.max(0.2, 1.0 - 0.5 * Math.cos(yearlyRadians));
+v_macroSeasonalMul = 1.0 + 0.2 * Math.cos(yearlyRadians);
 
 double dailyBaseline = 0.1;
 if (v_currentHourOfDay >= 8.0 && v_currentHourOfDay <= 18.0) {
     
     if (v_currentHourOfDay >= 12.0 && v_currentHourOfDay < 13.0) {
-        dailyBaseline = 0.2; // The Lunch Break slowdown
+        dailyBaseline = 0.7; // The Lunch Break slowdown
     } else {
         // Linear bell curve peaking at 11:00 AM
         double distanceFromPeak = Math.abs(v_currentHourOfDay - 11.0);
         dailyBaseline = 1.0 + Math.max(0, 1.5 - (distanceFromPeak / 3.0));
     }
 }
-v_microDailyMul = dailyBaseline;
-]]></Action>
+v_microDailyMul = dailyBaseline;]]></Action>
+				</Event>
+				<Event>
+					<Id>1781366752987</Id>
+					<Name><![CDATA[computeHourlyRate]]></Name>
+					<X>180</X><Y>690</Y>
+					<Label><X>10</X><Y>0</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<Properties TriggerType="timeout" Mode="cyclic">
+						<Timeout Class="CodeUnitValue">
+							<Code><![CDATA[1]]></Code>
+							<Unit Class="TimeUnits"><![CDATA[HOUR]]></Unit>
+						</Timeout>
+						<Rate Class="CodeUnitValue">
+							<Code><![CDATA[1]]></Code>
+							<Unit Class="RateUnits"><![CDATA[PER_HOUR]]></Unit>
+						</Rate>
+						<Id>1781366752985</Id>
+						<OccurrenceAtTime>true</OccurrenceAtTime>
+						<OccurrenceDate>1781424000000</OccurrenceDate>
+						<OccurrenceTime Class="CodeUnitValue">
+							<Code><![CDATA[0]]></Code>
+							<Unit Class="TimeUnits"><![CDATA[HOUR]]></Unit>
+						</OccurrenceTime>
+						<RecurrenceCode Class="CodeUnitValue">
+							<Code><![CDATA[0.25]]></Code>
+							<Unit Class="TimeUnits"><![CDATA[HOUR]]></Unit>
+						</RecurrenceCode>
+						<Condition><![CDATA[false]]></Condition>
+					</Properties>
+					<Action><![CDATA[double hourlyNoise = uniform(0.90, 1.10);
+hourlyRate = orderSchedule.getValue() ? ((p_ArrivalRate / 10.0) * v_macroSeasonalMul * v_microDailyMul * hourlyNoise) : 0.0;
+
+eventArrivalTrigger.onChange();]]></Action>
 				</Event>
 			</Events>
 			<Functions>
@@ -2769,7 +2875,7 @@ v_microDailyMul = dailyBaseline;
 					<ReturnType><![CDATA[String]]></ReturnType>
 					<Id>1778589839156</Id>
 					<Name><![CDATA[getScheduleDescription]]></Name>
-					<X>400</X><Y>1200</Y>
+					<X>390</X><Y>1150</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -2777,10 +2883,10 @@ v_microDailyMul = dailyBaseline;
 					<Body><![CDATA[String desc = "Shift: ";
 
 for (int h = 0; h < 24; h++) {
-    if (workSchedule.getValue((double)h) > 0) {
+    if (workSchedule.getValue(h) == true) {
         int start = h;
         
-        while (h < 24 && workSchedule.getValue((double)h) > 0) {
+        while (h < 24 && workSchedule.getValue(h) == true) {
             h++;
         }
         int end = h;
@@ -2802,7 +2908,7 @@ return desc.equals("Shift: ") ? "No active shifts" : desc;]]></Body>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>true</ShowLabel>
 					<Body><![CDATA[double slowTrend = 50 + 15 * Math.sin(2 * Math.PI * time() / 8760);
-double randomNoise = normal(0, 3); // AnyLogic's normal distribution (mean=0, stdev=3)
+double randomNoise = normal(0, 3);
 return slowTrend + randomNoise;]]></Body>
 				</Function>
 			</Functions>
@@ -2810,14 +2916,14 @@ return slowTrend + randomNoise;]]></Body>
 				<Schedule>
 					<Id>1777909177318</Id>
 					<Name><![CDATA[workSchedule]]></Name>
-					<X>290</X><Y>1170</Y>
+					<X>290</X><Y>1100</Y>
 					<Label><X>10</X><Y>0</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
 					<ShowLabel>true</ShowLabel>
-					<ValueType>integer</ValueType>
+					<ValueType>onOff</ValueType>
 					<UnitType><![CDATA[NONE]]></UnitType>
-					<DefaultValue>0</DefaultValue>
+					<DefaultValue>false</DefaultValue>
 					<RepresentationMode>intervals</RepresentationMode>
 					<RepresentationType>timeUnits</RepresentationType>
 					<FirstDayOfWeek>sunday</FirstDayOfWeek>
@@ -2840,7 +2946,7 @@ return slowTrend + randomNoise;]]></Body>
 							<ValueColumnReference>
 							</ValueColumnReference>
 					</IntervalsQuery>
-					<Action><![CDATA[if (value > 0) {
+					<Action><![CDATA[if (value == true) {
     // START OF DAY
     holdNightOrders.unblock();
     py.run("update_shift_status(True)");
@@ -2853,12 +2959,12 @@ return slowTrend + randomNoise;]]></Body>
 						<Interval>
 							<Start>28800000</Start>
 							<End>43200000</End>
-							<Value>100</Value>
+							<Value>true</Value>
 						</Interval>
 						<Interval>
 							<Start>46800000</Start>
 							<End>64800000</End>
-							<Value>100</Value>
+							<Value>true</Value>
 						</Interval>
 					</Intervals>
 					<Exceptions>
@@ -2866,43 +2972,43 @@ return slowTrend + randomNoise;]]></Body>
 							<Annually>true</Annually>
 							<Start>1797984000000</Start>
 							<End>1798847940000</End>
-							<Value>0</Value>
+							<Value>false</Value>
 						</Exception>
 						<Exception>
 							<Annually>true</Annually>
 							<Start>1799193600000</Start>
 							<End>1799279940000</End>
-							<Value>0</Value>
+							<Value>false</Value>
 						</Exception>
 						<Exception>
 							<Annually>true</Annually>
 							<Start>1808611200000</Start>
 							<End>1808697540000</End>
-							<Value>0</Value>
+							<Value>false</Value>
 						</Exception>
 						<Exception>
 							<Annually>true</Annually>
 							<Start>1806537600000</Start>
 							<End>1809215940000</End>
-							<Value>0</Value>
+							<Value>false</Value>
 						</Exception>
 						<Exception>
 							<Annually>true</Annually>
 							<Start>1811894400000</Start>
 							<End>1811980740000</End>
-							<Value>0</Value>
+							<Value>false</Value>
 						</Exception>
 						<Exception>
 							<Annually>true</Annually>
 							<Start>1817078400000</Start>
 							<End>1818460740000</End>
-							<Value>0</Value>
+							<Value>false</Value>
 						</Exception>
 						<Exception>
 							<Annually>true</Annually>
 							<Start>1825027200000</Start>
 							<End>1825113540000</End>
-							<Value>0</Value>
+							<Value>false</Value>
 						</Exception>
 					</Exceptions>
 				</Schedule>
@@ -2939,8 +3045,7 @@ return slowTrend + randomNoise;]]></Body>
 							<ValueColumnReference>
 							</ValueColumnReference>
 					</IntervalsQuery>
-					<Action><![CDATA[eventArrivalTrigger.restart(0, HOUR);
-if (value == true) {
+					<Action><![CDATA[if (value == true) {
     py.run("update_factory_status(True)");
 } else {
     py.run("update_factory_status(False)");
@@ -3804,58 +3909,55 @@ assembler.set_quantity4(agent.p_C3);]]></Code>
 						<Parameter>
 							<Name><![CDATA[onExit]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[
-	agent.p_orderID = v_orderCount++;
-	agent.p_startTime = time();
-	agent.p_C1 = (int)uniform_discr(3, 10);
-	agent.p_C2 = (int)uniform_discr(3, 10);
-	agent.p_C3 = (int)uniform_discr(3, 10);
-	agent.p_C4 = (int)uniform_discr(2, 6);
+								<Code><![CDATA[agent.p_orderID = v_orderCount++;
+agent.p_startTime = time();
+agent.p_C1 = (int)uniform_discr(3, 10);
+agent.p_C2 = (int)uniform_discr(3, 10);
+agent.p_C3 = (int)uniform_discr(3, 10);
+agent.p_C4 = (int)uniform_discr(2, 6);
 
-	agent.p_custLat = uniform(44.5, 47.0); //create orders from location of the map, stochastic
-	agent.p_custLon = uniform(7.5, 14.0);
+agent.p_custLat = uniform(44.5, 47.0); //create orders from location of the map, stochastic
+agent.p_custLon = uniform(7.5, 14.0);
 	
-	agent.p_creationDate = date();
+agent.p_creationDate = date();
 
-	agent.p_priority = (int)uniform_discr(1, 3);
-	agent.p_deliveryDeadline = time() + 24;
+agent.p_priority = (int)uniform_discr(1, 3);
+agent.p_deliveryDeadline = time() + 24;
 
-	double d1 = map.getDistanceByRoute(agent.p_custLat, agent.p_custLon, MilanLC2.getLatitude(), MilanLC2.getLongitude()) / 1000.0;
-	double d2 = map.getDistanceByRoute(agent.p_custLat, agent.p_custLon, VeronaLC3.getLatitude(), VeronaLC3.getLongitude()) / 1000.0;
-	double d3 = map.getDistanceByRoute(agent.p_custLat, agent.p_custLon, BolzanoLC1.getLatitude(), BolzanoLC1.getLongitude()) / 1000.0;
+double d1 = map.getDistanceByRoute(agent.p_custLat, agent.p_custLon, BolzanoLC1.getLatitude(), BolzanoLC1.getLongitude()) / 1000.0;
+double d2 = map.getDistanceByRoute(agent.p_custLat, agent.p_custLon, MilanLC2.getLatitude(), MilanLC2.getLongitude()) / 1000.0;
+double d3 = map.getDistanceByRoute(agent.p_custLat, agent.p_custLon, VeronaLC3.getLatitude(), VeronaLC3.getLongitude()) / 1000.0;
 
-	int destination = 0;
-	if (d1 <= d2 && d1 <= d3) {
-    	if (bufferCenter1.size() < p_capacityLC1) destination = 1;
-    	else if (bufferCenter2.size() < p_capacityLC2) destination = 2;
-    	else destination = 3;
-	}else if (d2 <= d1 && d2 <= d3){
-		if (bufferCenter2.size() < p_capacityLC2) destination = 2;
-    	else if (bufferCenter1.size() < p_capacityLC1) destination = 1;
-    	else destination = 3;
-	}else {
-		if (bufferCenter3.size() < p_capacityLC3) destination = 3;
-    	else if (bufferCenter1.size() < p_capacityLC1) destination = 1;
-    	else destination = 2;
-	}
+int destination = 0;
+	
+if (d1 <= d2 && d1 <= d3) {
+   	if (bufferCenter1.size() < p_capacityLC1) destination = 1;
+   	else if (bufferCenter2.size() < p_capacityLC2) destination = 2;
+   	else destination = 3;
+	
+} else if (d2 <= d1 && d2 <= d3) {
+	if (bufferCenter2.size() < p_capacityLC2) destination = 2;
+   	else if (bufferCenter1.size() < p_capacityLC1) destination = 1;
+   	else destination = 3;
+} else {
+	if (bufferCenter3.size() < p_capacityLC3) destination = 3;
+   	else if (bufferCenter1.size() < p_capacityLC1) destination = 1;
+   	else destination = 2;
+}
+	
+if(destination == 1) agent.p_finalDistance = d1;
+else if(destination == 2) agent.p_finalDistance = d2;
+else agent.p_finalDistance = d3;
 
-	if(destination == 1) agent.p_finalDistance = d1;
-	else if(destination == 2) agent.p_finalDistance = d2;
-	else agent.p_finalDistance = d3;
+agent.setXYZ(agent.p_custLat, agent.p_custLon, 0);
 
-	agent.setXYZ(agent.p_custLat, agent.p_custLon, 0);
+agent.p_targetCenter = destination;
 
-	agent.p_targetCenter = destination;
-	v_currentTarget = destination; //for the component C4
-	this.v_tempOrderID = agent.p_orderID;
+for(int i=0; i < agent.p_C1; i++) { sourceS1.inject(); }
+for(int i=0; i < agent.p_C2; i++) { sourceS2.inject(); }
+for(int i=0; i < agent.p_C3; i++) { sourceS3.inject(); }
 
-	for(int i=0; i < agent.p_C1; i++) { sourceS1.inject(); }
-	for(int i=0; i < agent.p_C2; i++) { sourceS2.inject(); }
-	for(int i=0; i < agent.p_C3; i++) { sourceS3.inject(); }
-
-	//traceln("Order " + agent.p_orderID + " created and assigned to Center " + destination);
-
-]]></Code>
+//traceln("Order " + agent.p_orderID + " created and assigned to Center " + destination);]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -4538,7 +4640,7 @@ agent.v_startLonC3 = agent.getLongitude();]]></Code>
 							<Name><![CDATA[resourceSets]]></Name>
 							<Value Class="CodeValue">
 								<Code><![CDATA[{ 
-  { staffAssembler }
+  { staffFloor }
 }]]></Code>
 							</Value>
 						</Parameter>
@@ -4727,8 +4829,11 @@ agent.p_orderCreationDate = v_processingOrder.p_creationDate;
 
 agent.setLatLon(productionFloor.getLatitude(), productionFloor.getLongitude());
 
+v_tempOrderID = agent.p_orderID;
+v_currentTarget = agent.p_targetCenter;
+
 for(int i=0; i < agent.p_C4; i++) { 
-    sourceS4.inject(); 
+    sourceS4.inject();
 }]]></Code>
 							</Value>
 						</Parameter>
@@ -4945,7 +5050,7 @@ tempAssemblerCO2 = 0;
 							<Name><![CDATA[resourceSets]]></Name>
 							<Value Class="CodeValue">
 								<Code><![CDATA[{ 
-  { staffAssembler }
+  { staffLC1 }
 }]]></Code>
 							</Value>
 						</Parameter>
@@ -5765,7 +5870,7 @@ agent.p_logicCenterName = self.getName();
 							<Name><![CDATA[resourceSets]]></Name>
 							<Value Class="CodeValue">
 								<Code><![CDATA[{ 
-  { staffAssembler }
+  { staffLC2 }
 }]]></Code>
 							</Value>
 						</Parameter>
@@ -6146,7 +6251,7 @@ agent.p_logicCenterName = self.getName();
 							<Name><![CDATA[resourceSets]]></Name>
 							<Value Class="CodeValue">
 								<Code><![CDATA[{ 
-  { staffAssembler }
+  { staffLC3 }
 }]]></Code>
 							</Value>
 						</Parameter>
@@ -12237,8 +12342,8 @@ double tripCO2 = distKm * p_emissionFactor;
 				</EmbeddedObject>
 				<EmbeddedObject>
 					<Id>1777909439041</Id>
-					<Name><![CDATA[staffAssembler]]></Name>
-					<X>300</X><Y>1190</Y>
+					<Name><![CDATA[staffFloor]]></Name>
+					<X>300</X><Y>1120</Y>
 					<Label><X>-25</X><Y>-5</Y></Label>
 					<PublicFlag>false</PublicFlag>
 					<PresentationFlag>true</PresentationFlag>
@@ -12261,7 +12366,7 @@ double tripCO2 = distKm * p_emissionFactor;
 						<Parameter>
 							<Name><![CDATA[capacityDefinitionType]]></Name>
 							<Value Class="CodeValue">
-								<Code><![CDATA[self.CAPACITY_SCHEDULE]]></Code>
+								<Code><![CDATA[self.CAPACITY_SCHEDULE_ON_OFF]]></Code>
 							</Value>
 						</Parameter>
 						<Parameter>
@@ -12281,9 +12386,15 @@ double tripCO2 = distKm * p_emissionFactor;
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[capacityScheduleOnOff]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[workSchedule]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[capacityOnValue]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[p_workersFloor]]></Code>
+							</Value>
 						</Parameter>
 						<Parameter>
 							<Name><![CDATA[shiftGroupSchedules]]></Name>
@@ -12645,6 +12756,783 @@ double tripCO2 = distKm * p_emissionFactor;
 					<InitializationType>SPECIFIED_NUMBER</InitializationType>
 					<InitializationDatabaseTableQuery>
 						<Id>1777989210760</Id>
+						<TableReference>
+						</TableReference>
+					</InitializationDatabaseTableQuery>
+					<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
+					<QuantityColumn>
+					</QuantityColumn>
+				</EmbeddedObject>
+				<EmbeddedObject>
+					<Id>1780310831687</Id>
+					<Name><![CDATA[staffLC1]]></Name>
+					<X>300</X><Y>1150</Y>
+					<Label><X>-25</X><Y>-5</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<ActiveObjectClass>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[ResourcePool]]></ClassName>
+					</ActiveObjectClass>
+					<GenericParameterSubstitute>
+						<GenericParameterSubstituteReference>
+							<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+							<ClassName><![CDATA[ResourcePool]]></ClassName>
+							<ItemName><![CDATA[1412336243135]]></ItemName>
+						</GenericParameterSubstituteReference>
+					</GenericParameterSubstitute>
+					<Parameters>
+						<Parameter>
+							<Name><![CDATA[type]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityDefinitionType]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[self.CAPACITY_SCHEDULE_ON_OFF]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacity]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[200]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityBasedOnAttractors]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacitySchedule]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[workSchedule]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityScheduleOnOff]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[workSchedule]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityOnValue]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[p_workersLC1]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupSchedules]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupSizes]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupsPlan]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[destroyExcessUnits]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[newUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[speed]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeLocationType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeNode]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeNodes]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[showDefaultAnimationStatic]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[downtimeSource]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceProfile]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[downtimeList]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableMaintenance]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[initialTimeToMaintenance]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[timeBetweenMaintenances]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTime]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableFailuresRepairs]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[initialTimeToFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[timeBetweenFailures]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[countBusyOnlyTimeToFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairTime]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairTaskStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableBreaks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breaksSchedule]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskPreemptionPolicy]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableCustomTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[customTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskPreemptionPolicy]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[customizeRequestChoice]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[requestChoiceCondition]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[addToCustomPopulation]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[population]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[forceStatisticsCollection]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onNewUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onDestroyUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onSeize]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onRelease]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onWrapUp]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onUnitStateChange]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onMaintenanceStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onMaintenanceEnd]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onRepair]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakEnd]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakTerminated]]></Name>
+						</Parameter>
+					</Parameters>
+					<ReplicationFlag>false</ReplicationFlag>
+					<Replication Class="CodeValue">
+						<Code><![CDATA[100]]></Code>
+					</Replication>
+					<CollectionType>ARRAY_LIST_BASED</CollectionType>
+					<InitialLocationType>XYZ</InitialLocationType>
+					<ColumnCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</ColumnCode>
+					<RowCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</RowCode>
+					<LocationNameCode Class="CodeValue">
+						<Code><![CDATA[""]]></Code>
+					</LocationNameCode>
+					<InitializationType>SPECIFIED_NUMBER</InitializationType>
+					<InitializationDatabaseTableQuery>
+						<Id>1780310831685</Id>
+						<TableReference>
+						</TableReference>
+					</InitializationDatabaseTableQuery>
+					<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
+					<QuantityColumn>
+					</QuantityColumn>
+				</EmbeddedObject>
+				<EmbeddedObject>
+					<Id>1780310876004</Id>
+					<Name><![CDATA[staffLC2]]></Name>
+					<X>300</X><Y>1180</Y>
+					<Label><X>-25</X><Y>-5</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<ActiveObjectClass>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[ResourcePool]]></ClassName>
+					</ActiveObjectClass>
+					<GenericParameterSubstitute>
+						<GenericParameterSubstituteReference>
+							<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+							<ClassName><![CDATA[ResourcePool]]></ClassName>
+							<ItemName><![CDATA[1412336243135]]></ItemName>
+						</GenericParameterSubstituteReference>
+					</GenericParameterSubstitute>
+					<Parameters>
+						<Parameter>
+							<Name><![CDATA[type]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityDefinitionType]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[self.CAPACITY_SCHEDULE_ON_OFF]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacity]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[200]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityBasedOnAttractors]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacitySchedule]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[workSchedule]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityScheduleOnOff]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[workSchedule]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityOnValue]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[p_workersLC2]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupSchedules]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupSizes]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupsPlan]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[destroyExcessUnits]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[newUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[speed]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeLocationType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeNode]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeNodes]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[showDefaultAnimationStatic]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[downtimeSource]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceProfile]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[downtimeList]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableMaintenance]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[initialTimeToMaintenance]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[timeBetweenMaintenances]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTime]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableFailuresRepairs]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[initialTimeToFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[timeBetweenFailures]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[countBusyOnlyTimeToFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairTime]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairTaskStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableBreaks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breaksSchedule]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskPreemptionPolicy]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableCustomTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[customTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskPreemptionPolicy]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[customizeRequestChoice]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[requestChoiceCondition]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[addToCustomPopulation]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[population]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[forceStatisticsCollection]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onNewUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onDestroyUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onSeize]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onRelease]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onWrapUp]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onUnitStateChange]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onMaintenanceStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onMaintenanceEnd]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onRepair]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakEnd]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakTerminated]]></Name>
+						</Parameter>
+					</Parameters>
+					<ReplicationFlag>false</ReplicationFlag>
+					<Replication Class="CodeValue">
+						<Code><![CDATA[100]]></Code>
+					</Replication>
+					<CollectionType>ARRAY_LIST_BASED</CollectionType>
+					<InitialLocationType>XYZ</InitialLocationType>
+					<ColumnCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</ColumnCode>
+					<RowCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</RowCode>
+					<LocationNameCode Class="CodeValue">
+						<Code><![CDATA[""]]></Code>
+					</LocationNameCode>
+					<InitializationType>SPECIFIED_NUMBER</InitializationType>
+					<InitializationDatabaseTableQuery>
+						<Id>1780310876002</Id>
+						<TableReference>
+						</TableReference>
+					</InitializationDatabaseTableQuery>
+					<InitializationDatabaseType>ONE_AGENT_PER_DATABASE_RECORD</InitializationDatabaseType>
+					<QuantityColumn>
+					</QuantityColumn>
+				</EmbeddedObject>
+				<EmbeddedObject>
+					<Id>1780310882779</Id>
+					<Name><![CDATA[staffLC3]]></Name>
+					<X>300</X><Y>1210</Y>
+					<Label><X>-25</X><Y>-5</Y></Label>
+					<PublicFlag>false</PublicFlag>
+					<PresentationFlag>true</PresentationFlag>
+					<ShowLabel>true</ShowLabel>
+					<ActiveObjectClass>
+						<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+						<ClassName><![CDATA[ResourcePool]]></ClassName>
+					</ActiveObjectClass>
+					<GenericParameterSubstitute>
+						<GenericParameterSubstituteReference>
+							<PackageName><![CDATA[com.anylogic.libraries.processmodeling]]></PackageName>
+							<ClassName><![CDATA[ResourcePool]]></ClassName>
+							<ItemName><![CDATA[1412336243135]]></ItemName>
+						</GenericParameterSubstituteReference>
+					</GenericParameterSubstitute>
+					<Parameters>
+						<Parameter>
+							<Name><![CDATA[type]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityDefinitionType]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[self.CAPACITY_SCHEDULE_ON_OFF]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacity]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[200]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityBasedOnAttractors]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacitySchedule]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[workSchedule]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityScheduleOnOff]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[workSchedule]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[capacityOnValue]]></Name>
+							<Value Class="CodeValue">
+								<Code><![CDATA[p_workersLC3]]></Code>
+							</Value>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupSchedules]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupSizes]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[shiftGroupsPlan]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[destroyExcessUnits]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[newUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[speed]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeLocationType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeNode]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[homeNodes]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[showDefaultAnimationStatic]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[downtimeSource]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceProfile]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[downtimeList]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableMaintenance]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[initialTimeToMaintenance]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[timeBetweenMaintenances]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTime]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceTaskStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[maintenanceUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableFailuresRepairs]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[initialTimeToFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[timeBetweenFailures]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[countBusyOnlyTimeToFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairType]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairTime]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairTaskStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[repairUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableBreaks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breaksSchedule]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakTaskPreemptionPolicy]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[breakUsageState]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[enableCustomTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[customTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskPriority]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskMayPreemptOtherTasks]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[endOfShiftTaskPreemptionPolicy]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[customizeRequestChoice]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[requestChoiceCondition]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[addToCustomPopulation]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[population]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[forceStatisticsCollection]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onNewUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onDestroyUnit]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onSeize]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onRelease]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onWrapUp]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onUnitStateChange]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onMaintenanceStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onMaintenanceEnd]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onFailure]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onRepair]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakStart]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakEnd]]></Name>
+						</Parameter>
+						<Parameter>
+							<Name><![CDATA[onBreakTerminated]]></Name>
+						</Parameter>
+					</Parameters>
+					<ReplicationFlag>false</ReplicationFlag>
+					<Replication Class="CodeValue">
+						<Code><![CDATA[100]]></Code>
+					</Replication>
+					<CollectionType>ARRAY_LIST_BASED</CollectionType>
+					<InitialLocationType>XYZ</InitialLocationType>
+					<ColumnCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</ColumnCode>
+					<RowCode Class="CodeValue">
+						<Code><![CDATA[0]]></Code>
+					</RowCode>
+					<LocationNameCode Class="CodeValue">
+						<Code><![CDATA[""]]></Code>
+					</LocationNameCode>
+					<InitializationType>SPECIFIED_NUMBER</InitializationType>
+					<InitializationDatabaseTableQuery>
+						<Id>1780310882777</Id>
 						<TableReference>
 						</TableReference>
 					</InitializationDatabaseTableQuery>
@@ -15068,22 +15956,31 @@ else if(p_targetCenter == 3) truckGreen.setVisible(true);]]></StartupCode>
 					<ParameterName><![CDATA[p_ArrivalRate]]></ParameterName>
 				</Parameter>
 				<Parameter>
-					<ParameterName><![CDATA[p_BufferOrders]]></ParameterName>
+					<ParameterName><![CDATA[p_emissionFactor]]></ParameterName>
 				</Parameter>
 				<Parameter>
-					<ParameterName><![CDATA[p_capacityLC1]]></ParameterName>
+					<ParameterName><![CDATA[p_MaxWaitLimit]]></ParameterName>
 				</Parameter>
 				<Parameter>
-					<ParameterName><![CDATA[p_capacityLC2]]></ParameterName>
+					<ParameterName><![CDATA[p_workersFloor]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[p_workersLC1]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[p_workersLC2]]></ParameterName>
+				</Parameter>
+				<Parameter>
+					<ParameterName><![CDATA[p_workersLC3]]></ParameterName>
 				</Parameter>
 				<Parameter>
 					<ParameterName><![CDATA[p_capacityLC3]]></ParameterName>
 				</Parameter>
 				<Parameter>
-					<ParameterName><![CDATA[p_emissionFactor]]></ParameterName>
+					<ParameterName><![CDATA[p_capacityLC2]]></ParameterName>
 				</Parameter>
 				<Parameter>
-					<ParameterName><![CDATA[p_MaxWaitLimit]]></ParameterName>
+					<ParameterName><![CDATA[p_capacityLC1]]></ParameterName>
 				</Parameter>
 			</Parameters>
 			<PresentationProperties>
@@ -15096,7 +15993,7 @@ else if(p_targetCenter == 3) truckGreen.setVisible(true);]]></StartupCode>
 			</PresentationProperties>
 			<ModelTimeProperties>
 				<StopOption><![CDATA[Never]]></StopOption>
-				<InitialDate><![CDATA[1772409600000]]></InitialDate>
+				<InitialDate><![CDATA[1790899200000]]></InitialDate>
 				<InitialTime><![CDATA[0.0]]></InitialTime>
 				<FinalDate><![CDATA[1776556800000]]></FinalDate>
 				<FinalTime><![CDATA[100.0]]></FinalTime>
