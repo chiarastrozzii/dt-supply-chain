@@ -23,7 +23,7 @@ def order_waiting_metrics():
         df['TotalCycleTime'] = (finish_time - start_time).dt.total_seconds() / 3600.0
 
         avg_total_cycle = round(float(df['TotalCycleTime'].mean()), 4)
-        avg_wait_center = round(float(df['WaitCenter'].mean()), 4) if 'WaitCenter' in df.columns else 0.0
+        avg_wait_center = round(float(df['WaitLogicCenter'].mean()), 4) if 'WaitLogicCenter' in df.columns else 0.0
         avg_wait_order = round(float(df['WaitOrder'].mean()), 4) if 'WaitOrder' in df.columns else 0.0
 
         if avg_total_cycle > 4.0:
@@ -40,7 +40,7 @@ def order_waiting_metrics():
             f"#### MACRO CYCLE PERFORMANCE\n"
             f"- **End-to-End Cycle Time:** `{avg_total_cycle}` hours\n\n"
             f"#### MICRO BOTTLENECK ANALYSIS\n"
-            f"- **Transit & Intake Delay (WaitCenter):** `{avg_wait_center}` hours\n"
+            f"- **Transit & Intake Delay (WaitLogicCenter):** `{avg_wait_center}` hours\n"
             f"- **Queue Processing Delay (WaitOrder):** `{avg_wait_order}` hours\n"
         )
         return text_output

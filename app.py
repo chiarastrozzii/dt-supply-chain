@@ -223,7 +223,7 @@ if current_data:
 
     c1.metric("Total Orders", f"{tot_orders}")
     c2.metric("Average Order Wait Time", f"{avg_wait:.2f}h")
-    c3.metric("Max Bottleneck from Production Floor to Logic Center", f"{max_bottleneck:.2f}h")
+    c3.metric("Max Inter-Facility Delay", f"{max_bottleneck:.2f}h")
     c4.metric("Total CO2", f"{total_co2:.2f}kg")
     c5.metric("Average Carbon Ratio", f"{carbon_ratio:.2f}")
     c6.metric("Market Index", f"{market_index:.2f}")

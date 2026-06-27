@@ -10,10 +10,10 @@
   "p_workersLC2": 15,
   "p_workersLC3": 10,
   "logisticsData" : [
-    {"location": "sourceS1", "lorries": 30, "unitsPerLorry": 10},
-    {"location": "sourceS2", "lorries": 20, "unitsPerLorry": 10},
-    {"location": "sourceS3", "lorries": 30, "unitsPerLorry": 10},
-    {"location": "sourceS4", "lorries": 10, "unitsPerLorry": 10},
-    {"location" : "productionFloor", "lorries": 50, "unitsPerLorry": 1}
+    {"location": "sourceS1", "lorries": 10, "unitsPerLorry": 10},
+    {"location": "sourceS2", "lorries": 5, "unitsPerLorry": 10},
+    {"location": "sourceS3", "lorries": 5, "unitsPerLorry": 10},
+    {"location": "sourceS4", "lorries": 3, "unitsPerLorry": 10},
+    {"location" : "productionFloor", "lorries": 20, "unitsPerLorry": 1}
   ]
 }
