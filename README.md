@@ -1,5 +1,16 @@
 # Multi-Agent Digital Twin
-This repository contains an end-to-end **Digital Twin (DT) framework** for simulating, forecasting, and optimizing supply chain operations. The project bridges a simulation layer with an AI-driven predictive/prescriptive analytics engine, accessible through a descriptive module.
+This repository contains an end-to-end **Digital Twin (DT) framework** for simulating, forecasting, and optimizing supply chain operations. The project bridges a simulation layer with an AI-driven predictive/prescriptive analytics engine, accessible through a unified web interface providing descriptive, predictive, and prescriptive analytics.
+
+## Dasboard
+### Descriptive Module
+
+
+### Predictive Module
+
+
+### Prescriptive Module
+
+
 
 ---
 
@@ -10,9 +21,9 @@ The repository is organized as follows:
 *   **`actual_system.alp`** & **`3d/`**: The core AnyLogic simulation model representing the operational layer of the digital twin.
 *   **`Libraries/`**: Project dependencies, including the configuration files required to bridge AnyLogic with Python (`pypeline.properties`).
 *   **`prescriptive/`**: Modules dedicated to prescriptive analytics, optimization scripts, and decision-support logic.
-*   **`forecast_engine.py`**: The time-series forecasting pipeline using Prophet model to estimate upcoming order volumes.
-*   **`brain.py`**: The asynchronous bridge which uses background threads to capture real-time data from the simulation and stream them to the web dashboard server.
-*   **`app.py`**: Front-end web application for the digital twin, responsible for rendering the descriptive layer (real-time data and visualizations) and interfacing with the predictive and prescriptive components.
+*   **`forecast_engine.py`**: Time-series forecasting engine based on Prophet, used to estimate future customer order volumes.
+*   **`brain.py`**: Asynchronous communication layer responsible for collecting real-time simulation data and streaming them to the web dashboard.
+*   **`app.py`**: Streamlit-based web application providing the user interface for the descriptive, predictive, and prescriptive modules.
 *   **`config.json`**: Configurable parameters for simulation setup.
 
 ---
@@ -28,8 +39,8 @@ Before running the project, ensure that the following software is installed:
 ### 1. Clone the repository
 
 ```bash
-git clone <https://github.com/chiarastrozzii/dt-supply-chain.git>
-cd <dt-supply-chain>
+git clone https://github.com/chiarastrozzii/dt-supply-chain.git
+cd dt-supply-chain
 ```
 
 ### 2. Create a Python virtual environment
@@ -57,6 +68,15 @@ pip install -r requirements.txt
 ```
 
 ---
+## Workflow
+
+The overall workflow is illustrated below:
+
+1. Run the AnyLogic simulation.
+2. Monitor the system through the descriptive dashboard.
+3. Generate demand forecasts.
+4. Use the AI assistant to analyze forecasts and obtain optimization recommendations.
+---
 
 ## AnyLogic Configuration
 
@@ -64,7 +84,7 @@ Before running the simulation, complete the following configuration steps.
 
 ### 1. Open the AnyLogic Model
 
-Open the project using **AnyLogic 8.9.8** (or a later version).
+Open the AnyLogic project.
 
 ### 2. Configure the Pypeline Connection
 
@@ -100,7 +120,7 @@ The application is designed to be used in three sequential phases: **descriptive
 
 ### 1. Launch the Web Application
 
-Inside your virtual machine start the Streamlit dashboard:
+Within the activated virtual environment, start the Streamlit dashboard:
 
 ```bash
 streamlit run app.py
@@ -112,7 +132,7 @@ streamlit run app.py
 
 Open the AnyLogic model and start the simulation.
 
-While the simulation is running, the **Descriptive** module of the dashboard displays the real-time state of the supply chain, including:
+While the simulation is running, the **Descriptive** module of the dashboard provides real-time monitoring of the simulated supply chain, including:
 
 - key performance indicators (KPIs);
 - interactive graphical visualizations.
@@ -123,12 +143,12 @@ Once the desired simulation horizon has been reached, stop the simulation.
 
 ---
 
-### 3. Generate Demand Forecasts (Predictive Module)
+### 3. Generate the Demand Forecast (Predictive Module)
 
 The forecasting model can be executed in one of two ways:
 
 - by clicking **Generate 1-Year Demand Forecast** from the left navigation bar on the dashboard
-- manually by running within the virtual machine
+- manually from the activated virtual environment
 
 ```bash
 python forecast_engine.py
@@ -149,13 +169,13 @@ After the forecast has been generated, the **Predictive** module on the dashboar
 
 ### 4. Use the Prescriptive Module
 
-Select **Open AI Assistant Chat** from the left navigation panel.
+Select the **Prescriptive** module from the left navigation panel.
 
 The dashboard provides an AI-powered assistant that can answer questions about the supply chain and recommend operational decisions based on the available data.
 
 You can either:
 
-- select one of the predefined prompt
+- select one of the predefined prompts
 - type your own question into the chat interface
 
 The assistant combines information from:
