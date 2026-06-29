@@ -28,7 +28,7 @@ Before running the project, ensure that the following software is installed:
 ### 1. Clone the repository
 
 ```bash
-git clone <>
+git clone <https://github.com/chiarastrozzii/dt-supply-chain.git>
 cd <dt-supply-chain>
 ```
 
