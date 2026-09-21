@@ -217,6 +217,6 @@ The assistant uses information from:
 ---
 
 ## Authors
-Chiara Strozzi
-Stefano Genetti
+Chiara Strozzi \
+Stefano Genetti \
 Giovanni Iacca
